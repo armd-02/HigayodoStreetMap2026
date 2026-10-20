@@ -1,0 +1,44 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const osm = require('../lib/osmtogeojson.js');
+const parse = file => vm.runInNewContext('(' + fs.readFileSync(file, 'utf8') + ')');
+const config = parse('data/config-user.jsonc');
+const targets = parse('data/overpass-custom.jsonc');
+const ctx = vm.createContext({ console, Conf: targets, poiCont: { adata: [] } });
+for (const file of ['lib/overpasslib.js', 'lib/playgroundmodels3d.js', 'lib/mapfeature3d.js']) {
+    vm.runInContext(fs.readFileSync(file, 'utf8'), ctx);
+}
+vm.runInContext('this.cache = new OverPassControl(); this.models = new MapFeature3D({modelFactories: PlaygroundModelFactories});', ctx);
+ctx.models.configure(config.feature3d);
+const raw = JSON.parse(fs.readFileSync('data/expo2025.json'));
+assert.deepEqual(JSON.parse(fs.readFileSync('data/expo2025.min.json')), raw);
+const features = osm(raw, { flatProperties: true });
+ctx.cache.setCache(features);
+const ids = ['12769696408', '12769696409', '12769696411', '12769696412', '12769696413', '12769696414', '12778226733', '12809077368', '12827740365'];
+const featureIds = ids.map(id => 'node/' + id).concat(['1379324925', '1413050362', '1413050367', '1429684266', '1437098095'].map(id => 'way/' + id));
+for (const id of featureIds) {
+    const i = ctx.cache.Cache.geojson.findIndex(f => f.id === id);
+    assert(i >= 0);
+    const feature = ctx.cache.Cache.geojson[i];
+    for (const target of ['expo2025_service', 'expo2025_art']) {
+        assert(ctx.cache.Cache.targets[i].includes(target));
+        assert.equal(config.poiView.poiZoom[target], target === 'expo2025_service' ? 15 : 16);
+    }
+    assert(ctx.models.getModelKey(feature.properties), 'model for ' + id);
+    if (feature.properties['playground:theme'] === 'komyaku') {
+        assert.equal(ctx.models.getModelKey(feature.properties), 'play_komyaku_eye');
+    }
+}
+assert.equal(ctx.models.getModelKey({ playground: 'cushion' }), 'play_cushion');
+for (const target of ['expo2025_service', 'expo2025_art']) {
+    assert(targets.osm[target].overpass.includes('nwr["playground"]'));
+    assert(ctx.cache.isTagsInclude({ id: 'relation/999999', playground: 'slide' }, targets.osm[target].tags));
+    assert(ctx.cache.isTagsInclude({ playground: 'unknown_equipment' }, targets.osm[target].tags));
+    assert.equal(ctx.cache.isTagsInclude({ leisure: 'park' }, targets.osm[target].tags), false);
+}
+assert.equal(ctx.models.getModelKey({ playground: 'structure' }), 'play_structure');
+assert.equal(ctx.models.getModelKey({ playground: 'slide' }), 'play_slide');
+assert.equal(ctx.models.getModelKey({ playground: 'unknown_equipment' }), undefined);
+assert(config.feature3d.rules.every(rule => !Object.hasOwn(rule.tags, 'id')));
+console.log('PASS: fourteen playgrounds, including polygon ways, have models and both target categories');

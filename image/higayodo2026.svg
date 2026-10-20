@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <rect width="960" height="540" rx="24" fill="#f3f6f2"/>
+  <path d="M0 390 960 110M210 0l310 540M0 130l960 300" stroke="#dbe6dc" stroke-width="45"/>
+  <rect x="70" y="150" width="820" height="240" rx="24" fill="white" fill-opacity=".95"/>
+  <g fill="#215c48" text-anchor="middle" font-family="sans-serif">
+    <text x="480" y="232" font-size="43" font-weight="bold">ひがよどストリートマップ</text>
+    <text x="480" y="302" font-size="52" font-weight="bold">2026</text>
+    <text x="480" y="352" font-size="23">準備中・掲載データ未登録</text>
+  </g>
+</svg>

@@ -1,0 +1,74 @@
+const fs = require('node:fs');
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+const rows = [
+    ['node/1', 'P1', 'Pavilion', '', 'tourism=attraction', ['expo2025_exp'], 'museum.png'],
+    ['node/3', 'P3', 'Other pavilion', '', 'tourism=attraction', ['expo2025_exp'], 'museum.png'],
+    ['node/2', '', 'Toilets', '', 'amenity=toilets', ['expo2025_restarea'], 'toilet.png']
+];
+const context = vm.createContext({console,
+    Conf: {
+        listTable: {category: 'menu', target: 'targets', allActs: true},
+        list: {columns: {poiFields: ['id','ref','name','reservation'],actFields: ['id'],style: []}},
+        osm: {expo2025_exp: {expression: {poiView: true}},expo2025_restarea: {expression: {poiView: true}}}
+    },
+    document: {getElementById: () => ({addEventListener() {}})},
+    list_category: {value: 'expo2025_exp'},
+    list_keyword: {value: 'Pavilion'},
+    poiCont: {getTargets: () => ['expo2025_exp','expo2025_restarea'],makeList: () => rows,
+        get_osmid: () => ({geojson: {properties: {}}})},
+    poiStatusCont: {getRecord: id => ({visited: id === 'node/1'})}
+});
+vm.runInContext(fs.readFileSync('lib/listtable.js','utf8')+'\nthis.table = new ListTable();',context);
+context.table.init();
+context.table.makeList(false);
+assert.equal(context.table.getFilterList().length,2);
+assert.equal(context.table.getFilterList()[0][0],'node/1');
+context.table.filterByPoiStatus('visited',false,false);
+assert.equal(context.table.getFilterList().length,1);
+context.list_keyword.value='Other';
+context.table.makeList(false);
+assert.equal(context.table.getFilterList().length,1);
+assert.equal(context.table.getFilterList()[0][0],'node/3');
+context.list_category.value='expo2025_restarea';
+context.list_keyword.value='';
+context.table.makeList(false);
+assert.equal(context.table.getFilterList()[0][0],'node/2');
+context.table.filterByPoiStatus('visited',false,false);
+assert.equal(context.table.getFilterList().length,0);
+console.log('PASS: manual Expo categories use target membership and preserve visit filtering');
+
+// The explicit all option must survive rebuilding and include every category.
+const userConfig = vm.runInNewContext('(' + fs.readFileSync('data/config-user.jsonc', 'utf8') + ')');
+context.Conf.selectItem = userConfig.selectItem;
+context.basic = { uniq: values => [...new Map(values.map(v => [JSON.stringify(v), v])).values()] };
+context.list_category.options = [];
+context.winCont = {
+    clearSelect: () => { context.list_category.options = []; context.list_category.value = ''; },
+    addSelect: (_id, text, value) => context.list_category.options.push({ text, value })
+};
+context.table.makeSelectList('menu');
+assert(context.list_category.options.some(option => option.text === '🗺️すべて表示' && option.value === '-'));
+context.table.selectCategory('-', false);
+assert.equal(context.list_category.value, '-');
+assert.equal(context.table.getFilterList().length, 3);
+context.table.makeSelectList('menu');
+assert.equal(context.list_category.value, '-');
+context.table.makeList(false);
+assert.equal(context.table.getFilterList().length, 3);
+assert.equal(userConfig.selectItem.default, 'expo2025_exp');
+console.log('PASS: all category option displays every target and persists across rebuilds');
+
+const labels = JSON.parse(fs.readFileSync('data/glot-custom.jsonc', 'utf8'));
+context.glot = { lang: 'en', get(key) { return labels[key]?.[this.lang]; } };
+context.table.makeSelectList('menu');
+assert.equal(context.list_category.value, '-', 'translation must preserve the selection');
+assert.equal(context.list_category.options.length, Object.keys(userConfig.selectItem.menu).length);
+assert(context.list_category.options.some(option => option.text === '🗺️Show all' && option.value === '-'));
+assert(context.list_category.options.some(option => option.text === '🏛️Pavilions & exhibitions' && option.value === 'expo2025_exp'));
+for (const option of context.list_category.options) assert.doesNotMatch(option.text, /[ぁ-んァ-ヶ一-龯]/);
+context.glot.lang = 'ja';
+context.table.makeSelectList('menu');
+assert.deepEqual(context.list_category.options.map(option => option.text), Object.keys(userConfig.selectItem.menu));
+assert.equal(context.list_category.value, '-');
+console.log('PASS: English and Japanese category menus preserve selection and category values');

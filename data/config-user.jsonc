@@ -1,0 +1,450 @@
+{
+    "siteUpdates": {
+        "size": "lg",
+        "use": false,
+        "autoOpen": "never",
+        "delayMs": 0,
+        "version": "20261021-01",
+        "storageKey": "higayodo2026.site-updates",
+        "buttonHosts": {
+            "desktop": "changesButtonDesktop",
+            "mobile": "changesButtonMobile"
+        },
+        "buttonLabel": {
+            "ja": "📣 新着",
+            "en": "📣 What’s new"
+        },
+        "title": {
+            "ja": "マップの更新履歴",
+            "en": "Map updates"
+        },
+        "contentUrl": {
+            "ja": "./data/updates-ja.html",
+            "en": "./data/updates-en.html"
+        }
+    },
+    "mapDisplayStatus": {
+        "use": false
+    },
+    "map": {
+        "changeMap": true,
+        "tileName": "OSMFJ_NOPOI",
+        "viewCenter": [
+            135.528728,
+            34.744132
+        ],
+        "viewPitch": 20,
+        "maxPitch": 75,
+        "maxBounds": [
+            [
+                135.48,
+                34.71
+            ],
+            [
+                135.6,
+                34.77
+            ]
+        ],
+        "initZoom": 15,
+        "maxZoom": 23,
+        "detailZoom": 18,
+        "zoomMessageThreshold": 15,
+        "textFont": [
+            "Noto Sans Bold"
+        ],
+        "textSize": 12,
+        "polygonMarker": {
+            "fill-color": "#CC6666",
+            "fill-opacity": 0.3
+        }
+    },
+    "minimap": {
+        "use": false,
+        "height": 200,
+        "initZoom": 2,
+        "viewCenter": [
+            135,
+            34
+        ]
+    },
+    "icon": {
+        "fgPath": "icon",
+        "bgPath": "image",
+        "flagPath": "./flags/w40",
+        "shadow": 0.65,
+        "attention": 0.65,
+        "green": 0.65,
+        "middle": 0.65,
+        "visited": 0.5,
+        "normal": 0.65,
+        "flag": 0.5,
+        "textFont": [
+            "Noto Sans Regular"
+        ],
+        "textSize": 10.5,
+        "textViewZoom": 16,
+        "markerColors": {
+            "hover": {
+                "stroke": "#e9a05b"
+            },
+            "attention": {
+                "fill": "#ffffff",
+                "stroke": "#ffc786"
+            },
+            "green": {
+                "fill": "#ffffff",
+                "stroke": "#51b3a1"
+            },
+            "middle": {
+                "fill": "#ffffff",
+                "stroke": "#4d77ac"
+            },
+            "normal": {
+                "fill": "#ffffff",
+                "stroke": "#bfbfe1"
+            },
+            "visited": {
+                "fill": "#ffffff",
+                "stroke": "#9c9c9c"
+            }
+        }
+    },
+    "poiView": {
+        "poiActLoad": false,
+        "poiZoom": {
+            "activity": 8
+        },
+        "mobilePoiZoom": {},
+        "editZoom": {
+            "HigayodoStreetMap": 14
+        },
+        "poiFilter": "all"
+    },
+    "poiData": {
+        "maxFeatures": 12000,
+        "pruneThreshold": 15000,
+        "applyToStatic": false
+    },
+    "selectItem": {
+        "default": "activity",
+        "menu": "",
+        "action": ""
+    },
+    "sideBar": {
+        "everyView": true,
+        "initView": "view"
+    },
+    "listTable": {
+        "nameFallback": "category",
+        "backgroundImage": "",
+        "category": "activity",
+        "target": "activity",
+        "allActs": true,
+        "playback": {
+            "view": false,
+            "zoomLevel": 15,
+            "timer": 4000
+        },
+        "download": false,
+        "csvColumn": [
+            "id",
+            "categoryJa",
+            "name",
+            "parentName",
+            "tag",
+            "categoryData",
+            "iconFile",
+            "lng",
+            "lat"
+        ],
+        "height": 0.6
+    },
+    "feature3d": {
+        "use": true,
+        "visualScale": 1,
+        "hitArea": {
+            "use": true,
+            "padding": 0.35,
+            "minSize": 2
+        },
+        "models": {
+            "play_aerialrotator": {
+                "type": "aerialrotator",
+                "size": 2
+            },
+            "play_basketrotator": {
+                "type": "basketrotator",
+                "size": 1.8
+            },
+            "play_activitypanel": {
+                "type": "activitypanel",
+                "size": 1.6
+            },
+            "play_cushion": {
+                "type": "trampoline",
+                "size": 3
+            },
+            "play_komyaku_eye": {
+                "type": "komyaku_eye",
+                "size": 2.7
+            },
+            "play_structure": {
+                "url": "./assets/models/playground/poly-pizza/composite-play-structure/composite-play-structure.glb",
+                "size": 8
+            },
+            "play_seesaw": {
+                "url": "./assets/models/playground/poly-pizza/seesaw/seesaw.glb",
+                "size": 4
+            },
+            "play_slide": {
+                "url": "./assets/models/playground/leonkin-playground/GLTF/slide.glb",
+                "size": 4
+            },
+            "bench": {
+                "url": "./assets/models/poi/bench/scene.gltf",
+                "size": 2
+            },
+            "drinking_water": {
+                "url": "./assets/models/poi/drinking-water/scene.gltf",
+                "size": 1.2,
+                "scaleBelowZoom": 19,
+                "maxZoomScale": 4
+            },
+            "vending_machine": {
+                "url": "./assets/models/poi/vending-machine/scene.gltf",
+                "size": 1.9,
+                "scaleBelowZoom": 19,
+                "maxZoomScale": 4
+            },
+            "vending_machine_red": {
+                "url": "./assets/models/poi/vending-machine-red/scene.gltf",
+                "size": 1.9,
+                "scaleBelowZoom": 19,
+                "maxZoomScale": 4
+            }
+        },
+        "rules": [
+            {
+                "tags": {
+                    "playground": "aerialrotator"
+                },
+                "model": "play_aerialrotator"
+            },
+            {
+                "tags": {
+                    "playground": "basketrotator"
+                },
+                "model": "play_basketrotator"
+            },
+            {
+                "tags": {
+                    "playground": "activitypanel"
+                },
+                "model": "play_activitypanel"
+            },
+            {
+                "tags": {
+                    "playground": "cushion",
+                    "playground:theme": "komyaku"
+                },
+                "model": "play_komyaku_eye"
+            },
+            {
+                "tags": {
+                    "playground": "cushion"
+                },
+                "model": "play_cushion"
+            },
+            {
+                "tags": {
+                    "playground": "structure"
+                },
+                "model": "play_structure"
+            },
+            {
+                "tags": {
+                    "playground": "slide"
+                },
+                "model": "play_slide"
+            },
+            {
+                "tags": {
+                    "playground": "seesaw"
+                },
+                "model": "play_seesaw"
+            },
+            {
+                "tags": {
+                    "amenity": "bench"
+                },
+                "model": "bench"
+            },
+            {
+                "tags": {
+                    "amenity": "drinking_water"
+                },
+                "model": "drinking_water"
+            },
+            {
+                "tags": {
+                    "amenity": "vending_machine",
+                    "brand": "コカ・コーラ"
+                },
+                "model": "vending_machine_red"
+            },
+            {
+                "tags": {
+                    "amenity": "vending_machine"
+                },
+                "model": "vending_machine"
+            }
+        ]
+    },
+    "thumbnail": {
+        "use": true,
+        "limits": 40,
+        "slideThumbWidth": "320",
+        "modalThumbWidth": "800"
+    },
+    "google": {
+        "AppScript": "",
+        "targetName": "activity",
+        "Analytics": ""
+    },
+    "static": {
+        "use": true,
+        "osmjsons": [
+            "./data/higayodo2026.json"
+        ]
+    },
+    "indoor": {
+        "use": false,
+        "defaultLevel": "0",
+        "floorHeightMeters": 3.66,
+        "buildingLevelHeightMeters": 3.66,
+        "floorOffsetMeters": 0.2,
+        "backgroundTransportationOpacity": 0.08,
+        "buildingSource": {
+            "type": "vectorTile",
+            "styleSource": "openmaptiles",
+            "dedicatedSource": "indoor-building-tiles",
+            "sourceUrl": "https://tile.openstreetmap.jp/data/planet.json",
+            "sourceLayer": "building",
+            "heightProperty": "render_height",
+            "minHeightProperty": "render_min_height",
+            "deduplicate": true
+        },
+        "fallbackLevels": {
+            "highway=corridor": "0"
+        },
+        "underground": {
+            "useWithoutBuilding": true,
+            "activationRadiusMeters": 60
+        },
+        "largeBuildingActivation": {
+            "use": true,
+            "minZoom": 15,
+            "referenceZoom": 18,
+            "viewportCoverageRatio": 1,
+            "groupNearbyBuildings": false
+        },
+        "buildingGroup": {
+            "smallBuildingAreaSquareMeters": 1500,
+            "groupRadiusMeters": 50,
+            "activationRadiusMeters": 50,
+            "requireIndoorPoi": true
+        },
+        "levels": {
+            "discoverFromData": true,
+            "order": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9"
+            ]
+        },
+        "control": {
+            "view": true,
+            "urlParameter": "level",
+            "label": "フロア"
+        }
+    },
+    "wikipedia": {
+        "marker": "wikipedia.svg",
+        "api_": "wikipedia.org/w/api.php?format=json&action=query&prop=extracts%7Cimages&exintro=&explaintext=&titles=",
+        "api": "wikipedia.org/api/rest_v1/page/summary/",
+        "domain": "wikipedia.org",
+        "tag": "wikipedia",
+        "image": true
+    },
+    "etc": {
+        "localSave": "higayodo2026",
+        "reverseIcon": false,
+        "editMode": false,
+        "splashUrl": "./image/higayodo2026.svg",
+        "loadingUrl": "./image/loading.gif"
+    },
+    "menu": {
+        "main": [
+            {
+                "glot-model": "about",
+                "linkto": "javascript:cMapMaker.about()",
+                "divider": false
+            },
+            {
+                "glot-model": "licence_title",
+                "linkto": "javascript:cMapMaker.licence()",
+                "divider": false
+            },
+            {
+                "glot-model": "develop_site",
+                "linkto": "https://github.com/armd-02/HigayodoStreetMap2026",
+                "divider": false
+            },
+            {
+                "glot-model": "openstreetmap",
+                "linkto": "https://www.openstreetmap.org/about",
+                "divider": true
+            }
+        ],
+        "mainSystem": [],
+        "modal": [
+            {
+                "glot-model": "copyShareLink",
+                "linkto": "javascript:cMapMaker.shareURL()",
+                "divider": false
+            },
+            {
+                "glot-model": "osm_open",
+                "linkto": "javascript:winCont.osm_open(cMapMaker.openOSMid)",
+                "divider": false
+            }
+        ],
+        "activities": [],
+        "editActivity": [
+            {
+                "btn_class": "btn btn-light border-secondary p-1 btn-max pe-auto",
+                "code": "javascript:modalActs.save()",
+                "icon_class": "fa-solid fa-cloud-arrow-up",
+                "btn_glot_name": "act_save"
+            }
+        ],
+        "visited": [
+            {
+                "btn_class": "btn btn-light border-secondary pe-auto",
+                "code": "javascript:poiStatusCont.import_load()",
+                "icon_class": "fa-solid fa-cloud-arrow-up",
+                "btn_glot_name": "act_upload"
+            }
+        ]
+    },
+    "activity": {
+        "url": ""
+    }
+}

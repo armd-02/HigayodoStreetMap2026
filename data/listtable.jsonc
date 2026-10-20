@@ -1,0 +1,36 @@
+{
+    "list": {
+        "columns": {
+            "style": [
+                {
+                    "className": "col-2"
+                },
+                {
+                    "className": "col-10"
+                },
+                {
+                    "className": "col-12 small",
+                    "icon": true,
+                    "fallbackName": true
+                },
+                {
+                    "className": "d-none"
+                }
+            ],
+            "poiFields": [
+                "id",
+                "ref",
+                "name",
+                "#category",
+                "reservation"
+            ],
+            "actFields": [
+                "id",
+                "#ref",
+                "memo",
+                "#category",
+                "#reservation"
+            ]
+        }
+    }
+}
