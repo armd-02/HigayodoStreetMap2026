@@ -168,6 +168,48 @@ assert.equal(layoutWrites, fixedWrites, 'camera changes must not toggle fixed im
 assert.equal(JSON.stringify(Array.from(sources.values(), source => source.coordinates)), fixedCorners);
 layer.destroy();
 
+// The shadow needs transparent margins, but must not shrink or displace the
+// original artwork. Verify texture padding and its geographic extent together.
+zoom = 15; angle = 0; pitchScale = 1; mobile = false;
+controls = []; hitAreas = [];
+const createElement = context.document.createElement;
+const draws = [];
+let canvas;
+const drawingContext = { drawImage: (...args) => draws.push(args) };
+context.document.createElement = tag => tag === 'canvas'
+    ? (canvas = { getContext: () => drawingContext, toDataURL: () => 'data:image/png;base64,shadow' })
+    : createElement(tag);
+const centered = { ...config.items[0], coordinates: fromPixel(500, 400) };
+const shadow = { use: true, color: 'rgba(0, 0, 0, 0.25)', blurPx: 4, offsetXPx: 2, offsetYPx: 4 };
+layer.init(map, { ...fixedConfig, items: [centered], shadow });
+flush();
+const shadowEntry = layer.items[0];
+assert.equal(drawingContext.shadowColor, shadow.color);
+close(drawingContext.shadowBlur, 4 * 200 / 120);
+close(drawingContext.shadowOffsetX, 2 * 200 / 120);
+close(drawingContext.shadowOffsetY, 4 * 200 / 120);
+assert.deepEqual(draws[0].slice(1), [20, 20, 200, 100]);
+assert.equal(canvas.width, 240);
+assert.equal(canvas.height, 140);
+close(bounds(shadowEntry).width, 144);
+close(bounds(shadowEntry).height, 84);
+const projected = sources.get(shadowEntry.layerId).coordinates.map(project);
+close((projected[0].x + projected[2].x) / 2, 500);
+close((projected[0].y + projected[2].y) / 2, 400);
+close(bounds(shadowEntry).width * 200 / canvas.width, 120);
+close(bounds(shadowEntry).height * 100 / canvas.height, 60);
+const shadowCorners = JSON.stringify(sources.get(shadowEntry.layerId).coordinates);
+zoom = 16;
+layer.render();
+assert.equal(draws.length, 1, 'create the shadow texture once, not on every camera update');
+assert.equal(JSON.stringify(sources.get(shadowEntry.layerId).coordinates), shadowCorners);
+layer.init(map, { ...fixedConfig, items: [{ ...centered, shadow: { use: false } }], shadow });
+flush();
+close(bounds(layer.items[0]).width, 240);
+assert.equal(draws.length, 1, 'individual images can disable the shared shadow');
+assert.equal(sources.get(layer.items[0].layerId).url, 'art0.png?ver=test');
+layer.destroy();
+
 const settings = JSON.parse(fs.readFileSync('data/config-user.jsonc', 'utf8')).mapIllustrations;
 assert.equal(settings.items.length, 9);
 assert.equal(settings.autoHide, false);

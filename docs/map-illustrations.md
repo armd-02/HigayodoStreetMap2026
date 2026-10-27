@@ -12,6 +12,10 @@
 | `minZoom`, `maxZoom` | 表示ズーム。`minZoom` 以上、`maxZoom` 未満 |
 | `referenceZoom` | 画像の大きさを決める基準ズーム。初期値15 |
 | `widthPx`, `mobileWidthPx` | 基準ズーム・傾きなしでのPC・画面幅640px以下での幅。縦横比は画像から取得 |
+| `shadow.use` | 画像の輪郭に沿う影を表示する |
+| `shadow.color` | 影の色と濃さ。初期値`rgba(0, 0, 0, 0.25)`（黒・不透明度25%） |
+| `shadow.blurPx` | 基準ズームでのぼかし量。初期値4px |
+| `shadow.offsetXPx`, `shadow.offsetYPx` | 基準ズームで影をずらす距離。初期値は右2px・下4px |
 | `maxVisible.desktop`, `maxVisible.mobile` | `autoHide: true`の場合の画面内の表示枚数の上限 |
 | `avoidPaddingPx` | `autoHide: true`の場合のPOIのアイコン・名称、操作部品、画面端との余白 |
 | `illustrationGapPx` | `autoHide: true`の場合のイラスト同士の最小間隔 |
@@ -22,6 +26,10 @@
 個別に `use: false` を指定すると無効になる。
 `coordinates` が未設定・不正な画像は表示しない。
 `widthPx`、`mobileWidthPx`、`referenceZoom`、`minZoom`、`maxZoom` は個別にも上書きできる。
+`shadow`も個別に上書きできる。たとえばロゴだけ影を消す場合は、ロゴの項目に
+`"shadow": { "use": false }`を追加する。
+影は透過部分の輪郭から描画し、元のPNGは変更しない。
+影の余白を含めて地図へ配置するため、元画像の中心座標や地図上の大きさも変えない。
 
 通常は、重なり・画面端・枚数によって画像全体を隠すことはしない。
 初期設定のズーム範囲は0以上24未満で、地図の操作可能範囲全体を含む。

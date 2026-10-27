@@ -45,6 +45,13 @@
         "maxZoom": 24,
         "widthPx": 120,
         "mobileWidthPx": 80,
+        "shadow": {
+            "use": true,
+            "color": "rgba(0, 0, 0, 0.25)",
+            "blurPx": 4,
+            "offsetXPx": 2,
+            "offsetYPx": 4
+        },
         "maxVisible": { "desktop": 4, "mobile": 2 },
         "avoidPaddingPx": 24,
         "illustrationGapPx": 40,
