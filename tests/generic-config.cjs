@@ -22,9 +22,15 @@ assert.equal(JSON.stringify(config), before);
 for (const key of Object.keys(config)) {
     assert.equal(JSON.stringify(prepared[key]), JSON.stringify(config[key]), `${key} is preserved`);
 }
-assert.equal(prepared.activity.url, config.google.AppScript);
-assert.equal(prepared.activity.targetName, config.google.targetName);
-assert.equal(prepared.activity.authMode, 'legacy');
+assert.equal(prepared.activity.url, config.activity.url);
+assert.equal(prepared.activity.targetName, config.activity.targetName);
+assert.equal(prepared.activity.authMode, 'basic');
+assert.equal(new URL(prepared.activity.url).protocol, 'https:');
+assert.equal(new URL(prepared.activity.url).searchParams.get('app'), 'higayodo_artfes_2026');
+assert.equal(prepared.google.AppScript, prepared.activity.url);
+assert.equal(prepared.activity.local.use, true);
+assert.ok(prepared.activity.local.hosts.includes('127.0.0.1'));
+assert.equal(new URL(prepared.activity.local.url).hostname, '127.0.0.1');
 for (const name of ['news', 'changes', 'intro', 'areaFeatureLinker', 'areaSearch',
     'discovery', 'listActions', 'directions']) {
     assert.equal(prepared[name].use, false, `${name} requires opt-in`);
@@ -38,16 +44,16 @@ assert.equal(context.modelLayer.getModelKey({ amenity: 'vending_machine', brand:
 assert.equal(context.modelLayer.getModelKey({ amenity: 'vending_machine' }), 'vending_machine');
 for (const model of Object.values(prepared.feature3d.models)) if (model.url) assert(fs.existsSync(model.url));
 assert.equal(prepared.indoor.use, false);
-assert.equal(parse('data/glot-custom.jsonc').site_title.ja, 'EXPO2025 万博マニアックマップ');
-assert.equal(parse('manifest.json').gId, 'G-T912TLST3W');
-assert.equal(prepared.map.tileName, 'EXPO2025_LASTDAY');
-assert.equal(JSON.stringify(prepared.map.viewCenter), '[135.38360336,34.64993865]');
-assert.equal(prepared.minimap.use, true);
-assert.equal(prepared.static.use, true);
-assert.equal(JSON.stringify(prepared.static.osmjsons), '["./data/expo2025.min.json"]');
-assert.equal(prepared.etc.localSave, 'expo2025');
-assert.equal(prepared.etc.reverseIcon, true);
-assert.equal(prepared.selectItem.default, 'expo2025_exp');
+assert.equal(parse('data/glot-custom.jsonc').site_title.ja, 'ひがよど文化祭 会場周遊マップ2026');
+assert.equal(parse('manifest.json').gId, '');
+assert.equal(prepared.map.tileName, 'OSMFJ_NOPOI');
+assert.equal(JSON.stringify(prepared.map.viewCenter), '[135.528728,34.744132]');
+assert.equal(prepared.minimap.use, false);
+assert.equal(prepared.static.use, false);
+assert.equal(JSON.stringify(prepared.static.osmjsons), '[]');
+assert.equal(prepared.etc.localSave, 'higayodo2026');
+assert.equal(prepared.etc.reverseIcon, false);
+assert.equal(prepared.selectItem.default, 'activity');
 assert.equal(prepared.icon.markerColors.attention.stroke, '#ffc786');
 assert.equal(JSON.stringify(parse('data/listtable.jsonc').list.columns.poiFields),
     '["id","ref","name","#category","reservation"]');
@@ -60,15 +66,16 @@ assert.equal(JSON.stringify(loaded.listTable), JSON.stringify(config.listTable),
     'loading list columns must preserve the complete user list settings');
 assert.equal(loaded.listTable.nameFallback, 'category');
 assert.equal(loaded.listTable.playback.view, false);
-assert.equal(loaded.listTable.backgroundImage, './image/bgimage.png');
-assert.equal(loaded.listTable.category, 'menu');
-assert.equal(loaded.listTable.target, 'targets');
+assert.equal(loaded.listTable.backgroundImage, '');
+assert.equal(loaded.listTable.category, 'activity');
+assert.equal(loaded.listTable.target, 'activity');
 assert.equal(loaded.mapDisplayStatus.use, false);
 assert.equal(prepared.menu.modal.find(item => item['glot-model'] === 'osm_open').linkto,
     'javascript:winCont.osm_open(cMapMaker.openOSMid)');
 
 // Explicit new settings take precedence over the legacy adapter and defaults.
 context.Conf = structuredClone(config);
+delete context.Conf.activity;
 context.Conf.google.AppScript = 'https://script.google.com/macros/s/example/exec';
 context.maker.prepareConfig();
 assert.equal(context.Conf.activity.url, context.Conf.google.AppScript);
@@ -81,4 +88,4 @@ assert.equal(context.Conf.activity.authMode, 'basic');
 assert.equal(context.Conf.activity.targetName, 'custom');
 assert.equal(context.Conf.areaFeatureLinker.use, true);
 assert.equal(context.Conf.feature3d.use, true);
-console.log('PASS: Expo archive settings, legacy GAS compatibility, disabled dedicated services, and explicit opt-in');
+console.log('PASS: Higayodo backend settings, legacy GAS compatibility, disabled dedicated services, and explicit opt-in');

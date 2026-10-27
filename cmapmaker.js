@@ -411,7 +411,7 @@ class CMapMaker extends IndoorControl {
         }
 
         const loadLocalActivitySchema = async function (settings) {
-            if (!settings) return;
+            if (!settings?.schemaUrl) return;
             const url = localActivityUrl(settings.schemaUrl);
             if (settings.app) url.searchParams.set("app", settings.app);
             const response = await fetch(url, { headers: { Accept: "application/json" }, cache: "no-store" });
@@ -475,6 +475,8 @@ class CMapMaker extends IndoorControl {
 
                     if (Conf.map.changeMap) mapLibre.addControl("bottom-right", "maplist", "<button onclick='cMapMaker.changeMap()'><i class='fas fa-layer-group fa-lg'></i></button>", "maplibregl-ctrl-group");
                     mapLibre.addControl("bottom-left", "images", "", "showcase"); // add images
+                    this.mapIllustrations = new MapIllustrations();
+                    this.mapIllustrations.init(mapLibre.map, Conf.mapIllustrations);
                     mapLibre.addNavigation("bottom-right");
                     mapLibre.addControl("bottom-left", "globalStatus", "", "m-0");
                     globalStatus.innerHTML = '<div class="global-status-message" role="status" aria-live="polite"><div id="globalSpinner" class="spinner-border spinner-border-sm text-primary flex-shrink-0 m-0 d-none" aria-hidden="true"></div><span id="globalMessage" class="globalMessage"></span></div>';
@@ -918,11 +920,9 @@ class CMapMaker extends IndoorControl {
             const activities = await gSheet.get(url.href, { throwOnError: true });
             if (requestId !== this.activityRequestId) return false;
             if (Conf.poiView.poiActLoad && !Conf.static.use) {
-                // Coordinate-less rows are returned in every BBOX. Let the viewport OSM query resolve them.
-                const osmids = [...new Set(activities.filter(act =>
-                    act.latitude !== null && act.longitude !== null
-                    && Number.isFinite(Number(act.latitude)) && Number.isFinite(Number(act.longitude))
-                ).map(act => act.osmid).filter(Boolean))]
+                // Imported rows may have no coordinates, and activity-only maps do not
+                // run a viewport OSM query. Resolve their OSM IDs here as well.
+                const osmids = [...new Set(activities.map(act => act.osmid).filter(Boolean))]
                     .filter(osmid => !poiCont.get_osmid(osmid));
                 if (osmids.length) {
                     try {

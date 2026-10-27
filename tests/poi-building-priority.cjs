@@ -54,8 +54,7 @@ context.poiCont = controller;
 const readConfig = path => vm.runInNewContext('(' + fs.readFileSync(path, 'utf8') + ')');
 context.Conf.marker = readConfig('data/marker.jsonc').marker;
 context.glot.get = () => 'undefined';
-const realTags = JSON.parse(fs.readFileSync('data/expo2025.json')).elements
-    .find(element => element.type === 'way' && element.id === 1365419673).tags;
+const realTags = { building: 'roof', leisure: 'bandstand' };
 for (const lang of ['ja', 'en']) {
     context.Conf.category = readConfig(`data/category-${lang}.jsonc`).category;
     context.Conf.category_keys = Object.keys(context.Conf.category);
@@ -91,3 +90,15 @@ for (const tags of [realTags, { building: 'roof' }, { building: 'roof', leisure:
     assert.equal(evaluate(expression, tags), controller.getIcon(tags));
 }
 console.log('PASS: building fallback, bandstand/toilet priority, Japanese/English categories and map/list icons');
+
+const importedActivity = { id: 'HigayodoStreetMap/0001', osmid: 'node/1', title: 'Imported' };
+controller.adata = [importedActivity];
+controller.getTargets = () => ['activity'];
+controller.get_osmid = id => id === 'node/1' ? poi : undefined;
+controller.getActlistByOsmid = id => id === 'node/1' ? [importedActivity] : [];
+context.Conf.activities = { higayodo_artfes_2026: {} };
+controller.setPoi([[importedActivity.id], [importedActivity.id]], true);
+assert.equal(sources.get('marker-attention').data.features.length, 1,
+    'Imported activity IDs must resolve independently of the app key and deduplicate shared OSM markers');
+assert.equal(sources.get('marker-attention').data.features[0].id, 'node/1');
+console.log('PASS: imported activity ID prefix differs from the app key');

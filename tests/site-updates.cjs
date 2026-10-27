@@ -29,7 +29,7 @@ const context = {
 };
 vm.createContext(context);
 vm.runInContext(fs.readFileSync('lib/siteupdates.js', 'utf8') + '\nthis.Controller = SiteUpdatesController;', context);
-const config = { use: true, autoOpen: 'daily', delayMs: 120, version: 'v1', storageKey: 'expo.test',
+const config = { use: true, autoOpen: 'daily', delayMs: 120, version: 'v1', storageKey: 'higayodo.test',
     title: { ja: '更新履歴', en: 'Updates' }, contentUrl: { ja: './updates-ja.html', en: './updates-en.html' } };
 (async () => {
     const controller = new context.Controller(config);
@@ -47,7 +47,7 @@ const config = { use: true, autoOpen: 'daily', delayMs: 120, version: 'v1', stor
     assert.equal(controller.modal.options.title, '更新履歴');
     assert.equal(controller.modal.options.html, '<h3>公開しました</h3>');
     assert.deepEqual(delays, [120]);
-    assert.equal(values.get('expo.test.date'), '2026-10-11');
+    assert.equal(values.get('higayodo.test.date'), '2026-10-11');
     controller.modal.hide();
     assert.equal(await new context.Controller(config).autoShow(), false); // Page reload, same browser/day.
     assert.equal(requests, 1); // No content request when suppressed.

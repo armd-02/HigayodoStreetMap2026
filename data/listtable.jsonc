@@ -26,10 +26,10 @@
             ],
             "actFields": [
                 "id",
-                "#ref",
-                "memo",
-                "#category",
-                "#reservation"
+                "title",
+                "body",
+                "category",
+                "openning"
             ]
         }
     }

@@ -19,8 +19,8 @@ const context = {
     ListActionButtons: stub
 };
 vm.createContext(context);
-vm.runInContext(`${fs.readFileSync('cmapmaker.js', 'utf8')}\nglobalThis.fixture = { cMapMaker, poiCont, gSheet, areaSearchController };`, context);
-const { cMapMaker, poiCont, gSheet, areaSearchController } = context.fixture;
+vm.runInContext(`${fs.readFileSync('cmapmaker.js', 'utf8')}\nglobalThis.fixture = { cMapMaker, poiCont, gSheet, areaSearchController, overPassCont };`, context);
+const { cMapMaker, poiCont, gSheet, areaSearchController, overPassCont } = context.fixture;
 context.Conf = {
     activity: { authMode: 'basic', url: 'https://example.test/api/activities.php?app=playgrounds' },
     poiView: { poiActLoad: false }, static: { use: false }
@@ -70,5 +70,26 @@ poiCont.setActlnglat = () => {};
     context.Conf.activity.authMode = 'legacy';
     assert.strictEqual(await cMapMaker.loadActivitiesForView(), false);
     assert.strictEqual(requests.length, 7);
-    console.log('PASS: Activity BBOX loading, move, stale response, retry, legacy mode');
+
+    context.Conf.activity.authMode = 'basic';
+    context.Conf.poiView.poiActLoad = true;
+    const imported = [
+        { id: 'import1', osmid: 'node/1', latitude: null, longitude: null },
+        { id: 'import2', osmid: 'node/1', latitude: null, longitude: null },
+        { id: 'cached', osmid: 'node/2' },
+        { id: 'way', osmid: 'way/3' },
+        { id: 'empty', osmid: '' }
+    ];
+    pending = () => Promise.resolve(imported);
+    const osmRequests = [];
+    let linked = false;
+    const features = { type: 'FeatureCollection', features: [] };
+    poiCont.get_osmid = id => id === 'node/2' ? {} : undefined;
+    overPassCont.getOsmIds = async ids => { osmRequests.push(Array.from(ids)); return features; };
+    poiCont.addGeojson = data => { assert.strictEqual(data, features); linked = true; };
+    poiCont.setActlnglat = () => { assert(linked, 'OSM features must load before linking activity locations'); };
+    assert.strictEqual(await cMapMaker.loadActivitiesForView(true), true);
+    assert.deepStrictEqual(osmRequests, [['node/1', 'way/3']]);
+    assert.strictEqual(poiCont.adata, imported);
+    console.log('PASS: Activity BBOX loading, move, stale response, retry, legacy mode, coordinate-less imports');
 })().catch(error => { console.error(error); process.exitCode = 1; });

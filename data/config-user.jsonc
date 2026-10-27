@@ -1,27 +1,6 @@
 {
     "siteUpdates": {
-        "size": "lg",
-        "use": false,
-        "autoOpen": "never",
-        "delayMs": 0,
-        "version": "20261021-01",
-        "storageKey": "higayodo2026.site-updates",
-        "buttonHosts": {
-            "desktop": "changesButtonDesktop",
-            "mobile": "changesButtonMobile"
-        },
-        "buttonLabel": {
-            "ja": "📣 新着",
-            "en": "📣 What’s new"
-        },
-        "title": {
-            "ja": "マップの更新履歴",
-            "en": "Map updates"
-        },
-        "contentUrl": {
-            "ja": "./data/updates-ja.html",
-            "en": "./data/updates-en.html"
-        }
+        "use": false
     },
     "mapDisplayStatus": {
         "use": false
@@ -57,6 +36,29 @@
             "fill-color": "#CC6666",
             "fill-opacity": 0.3
         }
+    },
+    "mapIllustrations": {
+        "use": true,
+        "autoHide": false,
+        "referenceZoom": 15,
+        "minZoom": 0,
+        "maxZoom": 24,
+        "widthPx": 120,
+        "mobileWidthPx": 80,
+        "maxVisible": { "desktop": 4, "mobile": 2 },
+        "avoidPaddingPx": 24,
+        "illustrationGapPx": 40,
+        "items": [
+            { "id": "illustration1", "image": "./moto_data/加工/イラスト1_結果.png", "coordinates": [135.5270, 34.7440], "priority": 1 },
+            { "id": "illustration2", "image": "./moto_data/加工/イラスト2_結果.png", "coordinates": [135.5298, 34.7455], "priority": 2 },
+            { "id": "illustration3", "image": "./moto_data/加工/イラスト3_結果.png", "coordinates": [135.5238, 34.7395], "priority": 3 },
+            { "id": "illustration4", "image": "./moto_data/加工/イラスト4_結果.png", "coordinates": [135.5387, 34.7460], "priority": 4 },
+            { "id": "illustration5", "image": "./moto_data/加工/イラスト5_結果.png", "coordinates": [135.5460, 34.7524], "priority": 5 },
+            { "id": "illustration6", "image": "./moto_data/加工/イラスト6_結果.png", "coordinates": [135.5220, 34.7330], "priority": 6 },
+            { "id": "illustration7", "image": "./moto_data/加工/イラスト7_結果.png", "coordinates": [135.5428, 34.7550], "priority": 7 },
+            { "id": "illustration8", "image": "./moto_data/加工/イラスト8_結果.png", "coordinates": [135.5378, 34.7402], "priority": 8 },
+            { "id": "higayodo-logo", "image": "./moto_data/加工/higayodo.png", "coordinates": [135.5200, 34.7495], "widthPx": 300, "mobileWidthPx": 180, "priority": 0 }
+        ]
     },
     "minimap": {
         "use": false,
@@ -110,13 +112,13 @@
         }
     },
     "poiView": {
-        "poiActLoad": false,
+        "poiActLoad": true,
         "poiZoom": {
             "activity": 8
         },
         "mobilePoiZoom": {},
         "editZoom": {
-            "HigayodoStreetMap": 14
+            "higayodo_artfes_2026": 14
         },
         "poiFilter": "all"
     },
@@ -307,15 +309,13 @@
         "modalThumbWidth": "800"
     },
     "google": {
-        "AppScript": "",
+        "AppScript": "https://armd-01.sakura.ne.jp/community-mapmaker-backend/api/activities.php?app=higayodo_artfes_2026",
         "targetName": "activity",
         "Analytics": ""
     },
     "static": {
-        "use": true,
-        "osmjsons": [
-            "./data/higayodo2026.json"
-        ]
+        "use": false,
+        "osmjsons": []
     },
     "indoor": {
         "use": false,
@@ -445,6 +445,13 @@
         ]
     },
     "activity": {
-        "url": ""
+        "url": "https://armd-01.sakura.ne.jp/community-mapmaker-backend/api/activities.php?app=higayodo_artfes_2026",
+        "authMode": "basic",
+        "targetName": "activity",
+        "local": {
+            "use": true,
+            "hosts": ["127.0.0.1", "localhost", "::1", "[::1]"],
+            "url": "http://127.0.0.1:18080/api/activities.php?app=higayodo_artfes_2026"
+        }
     }
 }

@@ -15,19 +15,7 @@ const context = vm.createContext({
 });
 vm.runInContext(fs.readFileSync('lib/wikimedialib.js', 'utf8') + '\nthis.wikimedia = new WikimediaLib();', context);
 (async () => {
-    const raw = JSON.parse(fs.readFileSync('data/expo2025.json'));
-    const pavilion = raw.elements.find(item => item.type === 'way' && item.id === 1382815794);
-    const tag = pavilion.tags.wikipedia;
-    assert.equal(tag, 'ja:住友館#大阪・関西万博（2025年）');
-    for (const name of ['data/expo2025.min.json', 'data/releases/2026-10-12/expo2025.osm.json']) {
-        assert.deepEqual(JSON.parse(fs.readFileSync(name)), raw);
-    }
-    const geo = JSON.parse(fs.readFileSync('data/releases/2026-10-12/expo2025.geojson'));
-    assert.equal(geo.features.find(item => item.id === 'way/1382815794').properties.tags.wikipedia, tag);
-    const mitsubishi = raw.elements.find(item => item.tags?.name === '三菱未来館');
-    assert.equal(mitsubishi.tags.wikipedia, 'ja:三菱未来館#大阪・関西万博_(2025年)');
-    assert.equal(geo.features.find(item => item.id === mitsubishi.type + '/' + mitsubishi.id).properties.tags.wikipedia, mitsubishi.tags.wikipedia);
-    for (const [value, title, section] of [[tag, '住友館', '大阪・関西万博（2025年）'], [mitsubishi.tags.wikipedia, '三菱未来館', '大阪・関西万博_(2025年)'], ['en:Example: Title', 'Example: Title', '']]) {
+    for (const [value, title, section] of [['ja:地域会館#沿革', '地域会館', '沿革'], ['ja:地域会館#利用_案内', '地域会館', '利用_案内'], ['en:Example: Title', 'Example: Title', '']]) {
         context.wikimedia.makeWikipediaOverView(value);
         await new Promise(resolve => setImmediate(resolve));
         assert.equal(requests.at(-1), title, 'API receives an article title without its section');
@@ -40,5 +28,5 @@ vm.runInContext(fs.readFileSync('lib/wikimedialib.js', 'utf8') + '\nthis.wikimed
     }
     assert.match(output.innerHTML, /<img/);
     assert.deepEqual(warnings, []);
-    console.log('PASS: Sumitomo data consistency, Wikipedia section links, plain titles and optional thumbnails');
+    console.log('PASS: Wikipedia section links, plain titles and optional thumbnails');
 })().catch(error => { console.error(error); process.exitCode = 1; });

@@ -12,7 +12,7 @@ READMEの技術的な更新履歴とは別に、利用者にとって変わっ�
     "autoOpen": "daily",
     "delayMs": 0,
     "version": "20261011-01",
-    "storageKey": "expo2025.site-updates",
+    "storageKey": "higayodo2026.site-updates",
     "title": { "ja": "マップの更新履歴", "en": "Map updates" },
     "contentUrl": { "ja": "./data/updates-ja.html", "en": "./data/updates-en.html" }
 }
