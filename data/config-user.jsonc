@@ -14,16 +14,7 @@
         ],
         "viewPitch": 20,
         "maxPitch": 75,
-        "maxBounds": [
-            [
-                135.48,
-                34.71
-            ],
-            [
-                135.6,
-                34.77
-            ]
-        ],
+        "maxBounds": [[135.5012078, 34.72018295], [135.5664074, 34.77111185]],
         "initZoom": 15,
         "maxZoom": 23,
         "detailZoom": 18,
@@ -56,6 +47,11 @@
         "avoidPaddingPx": 24,
         "illustrationGapPx": 40,
         "items": [
+            {"id": "festival-frame", "image": "./image/higayodo-map-frame.png", "widthPx": 2048, "mobileWidthPx": 2048, "shadow": {"use": false}, "priority": -10, "corners": [[135.5120744, 34.7626237], [135.5555408, 34.7626237], [135.5555408, 34.7286711], [135.5120744, 34.7286711]]},
+            {"id": "festival-corner-top-left", "image": "./image/higayodo-corner-top-left.png", "widthPx": 520, "mobileWidthPx": 520, "shadow": {"use": false}, "priority": -9, "corners": [[135.5120744, 34.7626237], [135.52323238950194, 34.7626237], [135.52323238950194, 34.75644083739117], [135.5120744, 34.75644083739117]]},
+            {"id": "festival-corner-top-right", "image": "./image/higayodo-corner-top-right.png", "widthPx": 520, "mobileWidthPx": 520, "shadow": {"use": false}, "priority": -9, "corners": [[135.54438281049804, 34.7626237], [135.5555408, 34.7626237], [135.5555408, 34.75792094704077], [135.54438281049804, 34.75792094704077]]},
+            {"id": "festival-corner-bottom-left", "image": "./image/higayodo-corner-bottom-left.png", "widthPx": 620, "mobileWidthPx": 620, "shadow": {"use": false}, "priority": -9, "corners": [[135.5120744, 34.73563257061902], [135.52537815671386, 34.73563257061902], [135.52537815671386, 34.7286711], [135.5120744, 34.7286711]]},
+            {"id": "festival-corner-bottom-right", "image": "./image/higayodo-corner-bottom-right.png", "widthPx": 620, "mobileWidthPx": 620, "shadow": {"use": false}, "priority": -9, "corners": [[135.54223704328612, 34.73595998731349], [135.5555408, 34.73595998731349], [135.5555408, 34.7286711], [135.54223704328612, 34.7286711]]},
             { "id": "illustration1", "image": "./moto_data/加工/イラスト1_結果.png", "coordinates": [135.5270, 34.7440], "priority": 1 },
             { "id": "illustration2", "image": "./moto_data/加工/イラスト2_結果.png", "coordinates": [135.5298, 34.7455], "priority": 2 },
             { "id": "illustration3", "image": "./moto_data/加工/イラスト3_結果.png", "coordinates": [135.5238, 34.7395], "priority": 3 },
@@ -64,7 +60,8 @@
             { "id": "illustration6", "image": "./moto_data/加工/イラスト6_結果.png", "coordinates": [135.5220, 34.7330], "priority": 6 },
             { "id": "illustration7", "image": "./moto_data/加工/イラスト7_結果.png", "coordinates": [135.5428, 34.7550], "priority": 7 },
             { "id": "illustration8", "image": "./moto_data/加工/イラスト8_結果.png", "coordinates": [135.5378, 34.7402], "priority": 8 },
-            { "id": "higayodo-logo", "image": "./moto_data/加工/higayodo.png", "coordinates": [135.5200, 34.7495], "widthPx": 300, "mobileWidthPx": 180, "priority": 0 }
+            { "id": "higayodo-logo", "image": "./moto_data/加工/higayodo.png", "coordinates": [135.5180, 34.7570], "widthPx": 600, "mobileWidthPx": 360, "priority": 0 },
+            { "id": "sanyodo-logo", "image": "./moto_data/加工/さんよどLogo_結果.jpg", "coordinates": [135.5487, 34.7360], "widthPx": 340, "mobileWidthPx": 204, "priority": 0 }
         ]
     },
     "minimap": {
@@ -145,7 +142,7 @@
     },
     "listTable": {
         "nameFallback": "category",
-        "backgroundImage": "",
+        "backgroundImage": "./image/higayodo-pattern-256.png",
         "category": "activity",
         "target": "activity",
         "allActs": true,

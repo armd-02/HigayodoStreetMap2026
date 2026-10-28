@@ -210,8 +210,61 @@ assert.equal(draws.length, 1, 'individual images can disable the shared shadow')
 assert.equal(sources.get(layer.items[0].layerId).url, 'art0.png?ver=test');
 layer.destroy();
 
+// A frame covers the exact requested area, independent of viewport/device.
+const frameBounds = [135.50757091, 34.7318729, 135.5556236, 34.75735317];
+const frameConfig = { use: true, items: [{ id: 'frame', image: 'frame.svg', bounds: frameBounds }] };
+layer.init(map, frameConfig);
+flush();
+assert.equal(layer.items.length, 1);
+const frameSourceId = layer.items[0].layerId;
+const frameCorners = JSON.stringify(sources.get(frameSourceId).coordinates);
+assert.equal(frameCorners, JSON.stringify([[frameBounds[0], frameBounds[3]],
+    [frameBounds[2], frameBounds[3]], [frameBounds[2], frameBounds[1]], [frameBounds[0], frameBounds[1]]]));
+const frameWrites = coordinateWrites;
+mobile = true; zoom = 12; angle = 0.7; pitchScale = 0.6;
+layer.render();
+assert.equal(JSON.stringify(sources.get(frameSourceId).coordinates), frameCorners);
+assert.equal(coordinateWrites, frameWrites);
+sources.clear(); rasterLayers.clear(); // Rebuild after a map style change.
+listeners.get('style.load')(); flush();
+assert.equal(JSON.stringify(sources.get(frameSourceId).coordinates), frameCorners);
+layer.destroy();
+assert.equal(sources.size, 0);
+assert.equal(rasterLayers.size, 0);
+layer.init(map, { use: true, items: [[2, 1, 0, 3], [0, 3, 2, 1], [0, 1, 2, 86], [0, 1, NaN, 3]]
+    .map(bounds => ({ image: 'invalid.svg', bounds })) });
+flush();
+assert.equal(layer.items.length, 0);
+layer.destroy();
+
+// Independently moving corners keeps the exact quadrilateral on all cameras.
+const quad = [[135.50757091, 34.75735317], [135.5555408, 34.7626237],
+    [135.5556236, 34.7318729], [135.5120744, 34.7286711]];
+layer.init(map, { use: true, items: [{ image: 'frame.png', corners: quad }] });
+flush();
+const quadId = layer.items[0].layerId;
+assert.equal(JSON.stringify(sources.get(quadId).coordinates), JSON.stringify(quad));
+mobile = false; zoom = 15; angle = 0; pitchScale = 1;
+layer.render();
+assert.equal(JSON.stringify(sources.get(quadId).coordinates), JSON.stringify(quad));
+layer.destroy();
+layer.init(map, { use: true, items: [
+    { image: 'crossed.png', corners: [quad[0], quad[2], quad[1], quad[3]] },
+    { image: 'invalid.png', corners: [[0, 0], [1, 1], [2, 86], [3, 1]] }
+] });
+flush();
+assert.equal(layer.items.length, 0);
+layer.destroy();
+
 const settings = JSON.parse(fs.readFileSync('data/config-user.jsonc', 'utf8')).mapIllustrations;
-assert.equal(settings.items.length, 9);
+assert.equal(settings.items.length, 15);
+const expectedFrame = [[135.5120744, 34.7626237], [135.5555408, 34.7626237],
+    [135.5555408, 34.7286711], [135.5120744, 34.7286711]];
+assert.equal(JSON.stringify(settings.items.find(item => item.id === 'festival-frame').corners), JSON.stringify(expectedFrame));
+for (const [suffix, index] of [['top-left', 0], ['top-right', 1], ['bottom-right', 2], ['bottom-left', 3]]) {
+    const corner = settings.items.find(item => item.id === 'festival-corner-' + suffix);
+    corner.corners[index].forEach((value, i) => close(value, expectedFrame[index][i]));
+}
 assert.equal(settings.autoHide, false);
 assert.equal(settings.minZoom, 0);
 assert.equal(settings.maxZoom, 24);

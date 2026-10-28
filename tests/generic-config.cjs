@@ -66,7 +66,8 @@ assert.equal(JSON.stringify(loaded.listTable), JSON.stringify(config.listTable),
     'loading list columns must preserve the complete user list settings');
 assert.equal(loaded.listTable.nameFallback, 'category');
 assert.equal(loaded.listTable.playback.view, false);
-assert.equal(loaded.listTable.backgroundImage, '');
+assert.equal(loaded.listTable.backgroundImage, './image/higayodo-pattern-256.png');
+assert.ok(fs.existsSync(loaded.listTable.backgroundImage));
 assert.equal(loaded.listTable.category, 'activity');
 assert.equal(loaded.listTable.target, 'activity');
 assert.equal(loaded.mapDisplayStatus.use, false);
