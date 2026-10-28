@@ -134,7 +134,7 @@
     "selectItem": {
         "default": "activity",
         "menu": "",
-        "action": ""
+        "action": "ChangePoi"
     },
     "sideBar": {
         "everyView": true,

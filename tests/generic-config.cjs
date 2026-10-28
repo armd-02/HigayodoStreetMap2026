@@ -25,6 +25,7 @@ for (const key of Object.keys(config)) {
 assert.equal(prepared.activity.url, config.activity.url);
 assert.equal(prepared.activity.targetName, config.activity.targetName);
 assert.equal(prepared.activity.authMode, 'basic');
+assert.equal(prepared.selectItem.action, 'ChangePoi', 'category changes must refresh the map and list');
 assert.equal(new URL(prepared.activity.url).protocol, 'https:');
 assert.equal(new URL(prepared.activity.url).searchParams.get('app'), 'higayodo_artfes_2026');
 assert.equal(prepared.google.AppScript, prepared.activity.url);
