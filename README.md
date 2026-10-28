@@ -36,6 +36,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 - `data/config-activities.jsonc`: バックエンドの項目に対応する詳細表示。
 - `manifest.json`: コピー元のアクセス解析IDを無効化。
 - `image/higayodo2026.svg`: 起動画面・favicon。
+- `image/higayodo2026-og.png`: SNS共有用の画像（1200×630px）。編集元は同名のSVGで、`rsvg-convert image/higayodo2026-og.svg -o image/higayodo2026-og.png` で再出力。
 - `lib/mapillustrations.js`: 固定座標のイラスト・ロゴ表示。
 - `docs/map-illustrations.md`: 装飾画像の座標・サイズ・表示設定。
 
@@ -52,6 +53,10 @@ python3 -m http.server 8765 --bind 127.0.0.1
 ## 更新履歴
 
 ### 2026-10-28
+
+- メニューの説明文に地図の使い方と「さんよど大文化祭」公式サイトへのリンクを追加。
+
+- SNS共有用のPNG画像を用意し、検索・OGP・Xの説明文を会場周遊マップの内容に統一。
 
 - 起動ロゴの中央に「ひがよど文化祭」の画像を配置し、準備中の表示を削除。
 - 開発サーバーの自動更新処理でも壊れないSVG構造へ変更。

@@ -16,8 +16,8 @@
         "en": "about Higayodo Street Map 2026"
     },
     "about_message": {
-        "ja": "ひがよど文化祭2026の会場・出展情報を地図で紹介します。地図上のアイコンや一覧から詳細をご覧いただけます。",
-        "en": "Explore venues and events for Higayodo Cultural Festival 2026. Select a map icon or a listing to see details."
+        "ja": "<p>大阪市東淀川区で開かれる「ひがよど文化祭2026」の会場周遊マップです。展示・ワークショップ・まち歩きなど、気になる催しを探して会場を巡ってみませんか。</p><p>地図のアイコンや一覧から、会場・出展内容・開催日時を確認できます。種類やキーワードで絞り込み、写真からも探せます。</p><p>関連イベントの情報は、<a href='https://sanyodo.osaka/' target='_blank' rel='noopener noreferrer'>さんよど大文化祭 公式サイト</a>をご覧ください。</p>",
+        "en": "<p>Explore Higayodo Cultural Festival 2026 in Higashiyodogawa, Osaka. Find exhibitions, workshops and walking tours, and visit the venues that interest you.</p><p>Select a map icon or a listing to see the venue, event details and schedule. Filter by category or keyword, or browse the photos.</p><p>For related events, visit the <a href='https://sanyodo.osaka/' target='_blank' rel='noopener noreferrer'>Sanyodo Cultural Festival official website (Japanese)</a>.</p>"
     },
     "owner": {
         "ja": "",
