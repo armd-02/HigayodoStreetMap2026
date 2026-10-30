@@ -153,6 +153,17 @@ assert.equal(changeButton.children[0].children[0].textContent, '新着');
 assert.equal(changeButton.children[0].children[2].textContent, '編集：osm_mapper');
 assert.ok(changeButton.children[0].children[2].className.split(/\s+/).includes('changes-modal__editor'));
 assert.equal(changeButton.href, undefined);
+const mapDetail = modal.createChangeItem({kind:'regionalCreated',name:'すべり台',parkName:'深草下河原児童公園',
+    osmId:'node/123',mapInfo:{featureType:'すべり台',tags:{playground:'slide',material:'wood',min_age:'3'}}}, [], {detail:true});
+assert(mapDetail.children.some(child=>child.className?.split(/\s+/).includes('changes-modal__name')
+    && child.textContent==='深草下河原児童公園のすべり台が地図に追加されました'));
+const mapInfo = mapDetail.children.find(child=>child.className==='changes-modal__map-info');
+assert(mapInfo.children.some(child=>child.textContent==='種類：すべり台'));
+assert(mapInfo.children.some(child=>child.textContent==='素材：wood'));
+assert(mapInfo.children.some(child=>child.textContent==='対象年齢（下限）：3'));
+assert(!mapInfo.children.some(child=>child.textContent?.includes('node/123')));
+const unnamedMapDetail=modal.createChangeItem({kind:'regionalUpdated',category:'遊具',osmId:'way/124'},[],{detail:true});
+assert(unnamedMapDetail.children.some(child=>child.className?.split(/\s+/).includes('changes-modal__name') && child.textContent.includes('遊具')));
 const duplicateReview = modal.createChangeItem({kind:'reviewUpdated',name:'十三東公園',parkName:'十三東公園',
     review:{title:'十三東公園',excerpt:'口コミ本文'}});
 assert(!duplicateReview.children.some(child=>child.className?.split(/\s+/).includes('changes-modal__review-title')));

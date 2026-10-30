@@ -1,4 +1,7 @@
 {
+    "facility_toilet_details": {"ja": "トイレの詳細を見る", "en": "View toilet details"},
+    "discovery_purposeHelp": {"ja": "登録済みの特徴・口コミで簡単に絞り込み", "en": "Quick filters using registered features and reviews"},
+    "discovery_registeredFeatures": {"ja": "登録済みの特徴・口コミで絞り込み中。情報未登録の場所も、条件に合う可能性があります。", "en": "Filtered by registered features and reviews. Places with missing information may also suit your purpose."},
     "thumbnail_scroll_hint": {
         "ja": "横にスクロール",
         "en": "Scroll sideways"
@@ -901,7 +904,7 @@
         "en": "Cinema"
     },
     "placeFilter_title": {
-        "ja": "詳しい条件",
+        "ja": "絞り込み",
         "en": "Detailed filters"
     },
     "placeFilter_apply": {
@@ -1310,5 +1313,17 @@
     "contribute_firstTime": {
         "ja": "初めての方へ：登録・参加方法",
         "en": "New here? How to register and contribute"
-    }
+    },
+    "changeFeed_featureType": {"ja": "種類：{type}", "en": "Type: {type}"},
+    "changeFeed_playgroundTag": {"ja": "遊具", "en": "Playground equipment"},
+    "changeFeed_leisureTag": {"ja": "公園・施設", "en": "Park / facility"},
+    "changeFeed_amenityTag": {"ja": "設備", "en": "Amenity"},
+    "changeFeed_materialTag": {"ja": "素材", "en": "Material"},
+    "changeFeed_surfaceTag": {"ja": "地面", "en": "Surface"},
+    "changeFeed_minAgeTag": {"ja": "対象年齢（下限）", "en": "Minimum age"},
+    "changeFeed_maxAgeTag": {"ja": "対象年齢（上限）", "en": "Maximum age"},
+    "changeFeed_accessTag": {"ja": "利用条件", "en": "Access"},
+    "changeFeed_wheelchairTag": {"ja": "車いす", "en": "Wheelchair"},
+    "changeFeed_openingHoursTag": {"ja": "利用時間", "en": "Opening hours"},
+    "changeFeed_operatorTag": {"ja": "管理者", "en": "Operator"}
 }

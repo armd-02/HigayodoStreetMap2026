@@ -44,9 +44,9 @@ const controller = new context.ChangeController({ use: true, apiUrl: 'https://ap
     assert.equal(outcome.state, 'changes');
     assert.equal(outcome.results.length, 3); // new, updated, favorite updated; duplicate query result removed
     assert(requests.some(url => url.includes('mode=objects') && url.includes('way%2F2')));
-    assert(requests.some(url => url.includes('created_from=2026-08-27') && url.includes('created_to=2026-09-27')));
-    assert(requests.some(url => url.includes('from=2026-08-27') && url.includes('to=2026-09-27')));
-    assert.equal(controller.read(controller.key('last-checked-at')), '2026-09-27T00:00:00.000Z');
+    assert(requests.some(url => url.includes('created_from=2026-09-26') && url.includes('created_to=2026-09-27')));
+    assert(requests.some(url => url.includes('from=2026-09-26') && url.includes('to=2026-09-27')));
+    assert.equal(controller.read(controller.regionKey('last-checked-at', '27')), '2026-09-27T00:00:00.000Z');
     const tickerItems = controller.tickerItems(3);
     assert.equal(tickerItems.length, 3);
     const newEntry = tickerItems.find(item => item.osmId === 'way/1');
@@ -54,14 +54,22 @@ const controller = new context.ChangeController({ use: true, apiUrl: 'https://ap
     assert.equal(newEntry.kind, 'regionalCreated');
     assert.equal(JSON.stringify(newEntry.coordinates), '[135.5,34.7]');
     assert.equal(newEntry.editorName, 'osm_mapper');
+    assert.equal(newEntry.mapInfo.tags.leisure, 'park');
+    assert.equal(newEntry.mapInfo.featureType, '公園');
+    context.poiCont = { get_osmid: () => ({ lnglat: [136, 35], geojson: { properties: {} } }) };
+    assert.equal(JSON.stringify(controller.tickerItems(3).find(item => item.osmId === 'way/1').coordinates),
+        '[135.5,34.7]', 'API coordinates take priority over an already loaded location');
     context.poiCont = { getCatnames: tags => {
         assert.equal(tags.playground, 'slide');
         return ['すべり台'];
     } };
     const categoryController = new context.ChangeController({}, { fetch, storage });
     categoryController.results = [{kind:'regionalCreated',target:{label:'遊具'},
-        item:{type:'node',id:10,tags:'{"playground":"slide"}'}}];
+        item:{type:'node',id:10,tags:'{"playground":"slide","material":"wood","min_age":"3"}'}}];
     assert.equal(categoryController.tickerItems()[0].name, 'すべり台');
+    assert.equal(categoryController.tickerItems()[0].mapInfo.featureType, 'すべり台');
+    assert.equal(categoryController.tickerItems()[0].mapInfo.tags.material, 'wood');
+    assert.equal(categoryController.tickerItems()[0].mapInfo.tags.min_age, '3');
     delete context.poiCont;
     assert(tickerItems.some(item => item.headline.includes('新しい公園')
         && item.url === 'https://www.openstreetmap.org/way/1'));
@@ -72,31 +80,33 @@ const controller = new context.ChangeController({ use: true, apiUrl: 'https://ap
     assert.equal(cachedController.tickerItems().length, 3);
     assert.equal(requests.length, requestsBeforeCache + 1); // Prefecture data only; no OSM query.
     assert.equal(JSON.stringify(cachedController.tickerItems().find(item => item.osmId === 'way/1').coordinates), '[135.5,34.7]');
-    values.delete('test.osm-cache-version');
+    values.delete('test.osm-cache-version.region.27');
+    values.set('test.last-checked-at.region.27', '2026-09-26T00:00:00.000Z');
     const beforeMigration=requests.length;
     assert.equal((await cachedController.checkOnStartup()).state,'changes');
     assert(requests.length>beforeMigration);
     assert.equal(cachedController.tickerItems().find(item=>item.osmId==='way/1').editorName,'osm_mapper');
-    assert.equal(values.get('test.osm-cache-version'),'2');
+    assert.equal(values.get('test.osm-cache-version.region.27'),'4');
     const beforeSameRegion = requests.length;
     await cachedController.checkOnStartup();
     assert.equal(requests.length, beforeSameRegion);
     cachedController.region = async () => ({code:'28',name:'兵庫県'});
+    values.set('test.last-checked-at.region.27', '2026-09-26T00:00:00.000Z');
     assert.equal((await cachedController.checkOnStartup()).state, 'changes');
     assert.equal(values.get('test.last-region'),'28');
     assert(requests.slice(beforeSameRegion).some(url => new URL(url).searchParams.get('prefecture_code') === '28'));
     values.set('test.last-region','27');
-    const savedResults = values.get('test.last-results');
+    const savedResults = values.get('test.last-results.region.27');
     const legacyResults = JSON.parse(savedResults).filter(result => result.item.id === 2);
     legacyResults.forEach(result => { delete result.item.lat; delete result.item.lon; });
-    values.set('test.last-results', JSON.stringify(legacyResults));
+    values.set('test.last-results.region.27', JSON.stringify(legacyResults));
     const oldCacheController = new context.ChangeController(controller.config,
         { fetch, storage, now: () => new Date('2026-09-27T00:00:00.000Z') });
     await oldCacheController.checkOnStartup();
     assert.equal(JSON.stringify(oldCacheController.tickerItems()[0].coordinates), '[135.5474254,34.476934]');
-    assert.equal(JSON.parse(values.get('test.last-results'))[0].item.lon, '135.5474254');
+    assert.equal(JSON.parse(values.get('test.last-results.region.27'))[0].item.lon, '135.5474254');
     assert.equal(oldCacheController.coordinates({ lon: null, lat: null }), null);
-    values.set('test.last-results', savedResults);
+    values.set('test.last-results.region.27', savedResults);
     const legacyValues = new Map([['test.last-checked-at', '2026-09-26T00:00:00.000Z'],
         ['test.last-shown-date', '2026-09-27']]);
     const legacyStorage = { getItem: key => legacyValues.get(key) ?? null,
@@ -106,17 +116,22 @@ const controller = new context.ChangeController({ use: true, apiUrl: 'https://ap
         { fetch, storage: legacyStorage, now: () => new Date('2026-09-27T00:00:00.000Z') });
     assert.equal((await legacyController.checkOnStartup()).state, 'changes');
     assert(requests.length > requestsBeforeLegacy);
-    assert(legacyStorage.getItem('test.last-results'));
-    values.delete(controller.key('last-shown-date'));
-    values.set(controller.key('last-checked-at'), '2026-09-26T00:00:00.000Z');
+    assert(legacyStorage.getItem('test.last-results.region.27'));
+    values.delete(controller.regionKey('last-shown-date', '27'));
+    values.set(controller.regionKey('last-checked-at', '27'), '2026-09-26T00:00:00.000Z');
     const firstValues = new Map();
     const firstStorage = { getItem: key => firstValues.get(key) ?? null,
         setItem: (key, value) => firstValues.set(key, value) };
     const requestsBeforeFirst = requests.length;
     const firstController = new context.ChangeController(controller.config,
         { fetch, storage: firstStorage, now: () => new Date('2026-09-27T00:00:00.000Z') });
-    assert.equal((await firstController.checkOnStartup()).state, 'changes');
-    assert(requests.length > requestsBeforeFirst);
+    assert.equal((await firstController.checkOnStartup()).state, 'first');
+    assert.equal(requests.length, requestsBeforeFirst + 1); // Region only, no historical queries.
+    assert.equal((await firstController.checkOnStartup()).state, 'first');
+    assert.equal(firstController.results.length, 0);
+    await firstController.loadInitialHistory();
+    assert.equal(firstController.results.length, 3);
+    assert.equal((await firstController.checkOnStartup()).state, 'first'); // Manual history never enables auto display.
     assert.equal(firstStorage.getItem('test.last-checked-at'), '2026-09-27T00:00:00.000Z');
     const monthEnd = new Date('2026-03-31T03:00:00.000Z');
     assert.equal(new Date(controller.monthsAgo(monthEnd, 1)).toISOString(), '2026-02-28T03:00:00.000Z');
@@ -135,11 +150,12 @@ const controller = new context.ChangeController({ use: true, apiUrl: 'https://ap
     assert.equal((await sixMonthController.checkOnStartup()).state, 'changes');
     assert(sixMonthRequests.some(url => url.includes('created_from=2025-09-30')));
     assert(sixMonthRequests.some(url => url.includes('from=2025-09-30')));
+    values.delete('test.last-shown-date.favorites');
     failed = true;
     const error = await controller.checkOnStartup();
     assert.equal(error.state, 'error');
-    assert.equal(controller.read(controller.key('last-checked-at')), '2026-09-26T00:00:00.000Z');
-    assert.equal(controller.read(controller.key('last-shown-date')), null);
+    assert.equal(controller.read(controller.regionKey('last-checked-at', '27')), '2026-09-26T00:00:00.000Z');
+    assert.equal(controller.read(controller.regionKey('last-shown-date', '27')), null);
     const storedBeforePreview = [...values];
     const requestsBeforePreview = requests.length;
     const mockResults = controller.previewRandom(10);

@@ -57,7 +57,7 @@ context.cMapMaker.favoriteFilter = true;
 controller.open("search");
 assert.strictEqual(elements.get("poiFilterPersonal").hidden, false);
 
-assert.strictEqual(elements.get("poiFilterTitle").textContent, "詳しい条件");
+assert.strictEqual(elements.get("poiFilterTitle").textContent, "絞り込み");
 assert.strictEqual(elements.get("poiFilterSearchContent").hidden, false);
 assert.strictEqual(elements.get("poiFilterActions").hidden, false);
 controller.open("rating");

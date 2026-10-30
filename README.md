@@ -26,6 +26,10 @@ python3 -m http.server 8765 --bind 127.0.0.1
 - 初期表示位置・表示範囲の参考: [armd-02/HigayodoStreetMap2025](https://github.com/armd-02/HigayodoStreetMap2025)
   - 参照コミット: `c3834568c9f82eedc187d19c3ac0ef98ee481904`
 
+- 共通コード更新元: [armd-02/Playgrounds](https://github.com/armd-02/Playgrounds)
+  - 取り込み確認コミット: `4455adb5b8a033f25404a605a2943f561ee3dfd0`（2026-10-31）
+  - 無効な機能も含む共通処理を更新し、ひがよど固有の設定・データ・装飾と既存の共通拡張は保持しています。
+
 ## 2026年版の設定
 
 - `index.html`: サイト名、説明、共有用URL、起動画面。
@@ -51,6 +55,11 @@ python3 -m http.server 8765 --bind 127.0.0.1
 登録地点に紐づくOSMデータはOverpass APIから取得します。
 
 ## 更新履歴
+
+### 2026-10-31
+
+- Playgrounds の共通修正を取り込み。新着からの即時移動と詳細再取得、Overpass の欠落地物の代替サーバー取得、地域別の更新履歴・初回訪問処理、口コミと地図情報の内訳、一覧ボタンのキーボード操作と状態同期、トイレの人数・詳細リンク、絞り込みラベルを更新。
+- ひがよどで無効な機能も更新対象とし、有効・無効の設定は維持。共通機能の実装資料は [検索と新着情報](docs/search-and-updates.md) に記載。
 
 ### 2026-10-28
 

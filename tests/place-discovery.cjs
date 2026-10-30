@@ -7,13 +7,13 @@ class Element {
     prepend(item){this.children.unshift(item);} replaceChildren(...items){this.children=items;}
     setAttribute(key,value){this[key]=value;} addEventListener(type,handler){(this.listeners??={})[type]=handler;}
 }
-const host=new Element('section'),strip=new Element('div');
+const host=new Element('section'),strip=new Element('div'),notice=new Element('p');
 const records=[{areaId:'way/1',name:'A',lng:135,lat:34,attributes:['shade'],linkedFeatures:[],activities:[]},
  {areaId:'way/2',name:'B',lng:135.002,lat:34,attributes:[],activities:[{picture_url1:'File:Example.jpg'}],linkedFeatures:[{feature:{properties:{amenity:'bench'}}}]}];
 let network=0,center={lng:135,lat:34},loadedImages=[];
 const context={Date,console,Conf:{etc:{localSave:'sample'},discovery:{use:true,presetIds:['relax'],featureFacts:[{key:'amenity',value:'bench',labelKey:'seating'}]}},
  localStorage:{getItem(){throw new Error('Unexpected storage read');},setItem(){throw new Error('Unexpected storage write');}},
- document:{querySelector:()=>null,getElementById:id=>id==='placeDiscovery'?host:strip,createElement:tag=>new Element(tag),querySelectorAll:()=>loadedImages},
+ document:{querySelector:()=>null,getElementById:id=>id==='placeDiscovery'?host:id==='placePurposeNotice'?notice:strip,createElement:tag=>new Element(tag),querySelectorAll:()=>loadedImages},
  glot:{lang:'en',get:key=>key},cMapMaker:{status:'normal'},
  mapLibre:{getZoom:()=>15,getUserLocation:()=>null,map:{getCenter:()=>center}},
  poiStatusCont:{getRecord:()=>({})},areaFeatureLinker:{records,resolveAreaId:id=>id,getAreaRecord:id=>records.find(record=>record.areaId===id)},
@@ -25,7 +25,9 @@ context.areaSearchController.applyLocalPreset=name=>{context.areaSearchControlle
 context.areaSearchController.clear=()=>{context.areaSearchController.activeCriteria=null;controller.render();};
 controller.render();assert.equal(host.children.length,2);assert.equal(host.children[1].tagName,'select');
 assert.equal(host.children[1].children.length,2); // No duplicate candidate list or action buttons.
-controller.choose('relax');assert.equal(host.children[1].value,'relax');assert.equal(network,0);
+assert.equal(notice.hidden,true);
+controller.choose('relax');assert.equal(notice.hidden,false);assert.equal(notice.textContent,'discovery_registeredFeatures');assert.equal(host.children[1].value,'relax');assert.equal(network,0);
+controller.choose('');assert.equal(notice.hidden,true);
 assert.deepEqual(Array.from(controller.facts(records[1])),['seating']);assert.equal(controller.photo(records[1]),'');
 loadedImages=[{complete:true,naturalWidth:100,dataset:{lazySrc:'File:Example.jpg'},src:'blob:loaded',getAttribute:key=>({osmid:'way/2',src:'blob:loaded',src_thumb:'https://example.test/photo.jpg'})[key]}];
 assert.equal(controller.photo(records[1]),'blob:loaded');loadedImages=[];

@@ -4,6 +4,7 @@ const vm = require('node:vm');
 
 const calls = [];
 class Ticker {
+    modalInstance = { hide: () => calls.push(['hideModal']) };
     init(container, config) { calls.push(['init', container, config]); }
     setItems(items, options) { calls.push(['setItems', items, options]); }
     hide() { calls.push(['hide']); }
@@ -26,7 +27,7 @@ const container = {};
 const intro = { hidden: false };
 const stub = class {};
 const context = {
-    console, Date,
+    console, Date, URL, location: {href:"https://example.test/"},
     window: { navigator: { language: 'ja' }, localStorage: { getItem: () => null } },
     document: { getElementById: id => id === 'cMapIntro' ? intro : {} },
     IndoorControl: stub, Glottologist: stub, Basic: stub, PoiStatusCont: stub, OverPassControl: stub,
@@ -39,7 +40,7 @@ const context = {
 };
 vm.createContext(context);
 vm.runInContext(fs.readFileSync('cmapmaker.js', 'utf8')
-    + '\nthis.fixture = { cMapMaker, changesController };', context);
+    + '\nthis.fixture = { cMapMaker, changesController, poiCont, gSheet };', context);
 context.Conf = { changes: { ticker: { use: true, maxItems: 30, mobileLabel: '公園・遊具の新着' } },
     intro: { use: true } };
 (async () => {
@@ -52,7 +53,13 @@ context.Conf = { changes: { ticker: { use: true, maxItems: 30, mobileLabel: '公
     assert.equal(calls[1][0], 'setItems');
     assert.equal(calls[1][1][0].headline, '新しい公園');
     assert.equal(await calls[0][2].onSelect({ osmId: 'way/219004605', coordinates: [135.5, 34.7] }), true);
-    assert.deepEqual(calls.at(-1), ['select', 'way/219004605', true, 0, [135.5, 34.7]]);
+    assert.equal(JSON.stringify(calls.find(call => call[0] === 'select')), JSON.stringify(['select', 'way/219004605', true, 0, [135.5, 34.7], { fromChanges: true }]));
+    let completeSelection;
+    context.fixture.poiCont.select = () => new Promise(resolve => { completeSelection = resolve; });
+    const pendingSelection = calls[0][2].onSelect({ osmId: 'way/1', coordinates: [135.5, 34.7] });
+    assert.equal(calls.at(-1)[0], 'hideModal', 'map is revealed before detail loading completes');
+    completeSelection();
+    assert.equal(await pendingSelection, true);
     assert.equal(await calls[0][2].onSelect({}), false);
     const mock = context.window.previewRandomChanges(3);
     assert.equal(mock.length, 3);
@@ -94,4 +101,28 @@ context.Conf = { changes: { ticker: { use: true, maxItems: 30, mobileLabel: '公
     await maker.initStartupNotices();
     assert.equal(introCalls, 3);
     console.log('PASS: startup changes, console preview and site notice sequencing');
+    let gets=0, shouldFail=false;
+    context.Conf.activity={url:'https://example.test/api?app=places&summary=1&limit=30&updated_since=old&bbox=old&osmids=old&id=old'};
+    context.fixture.poiCont.adata=[];
+    context.fixture.poiCont.setActdata=rows=>{context.fixture.poiCont.adata=rows;};
+    context.fixture.gSheet.get=async (url, options)=>{
+        gets++;const parsed=new URL(url);
+        assert.equal(parsed.searchParams.get('app'),'places');assert.equal(parsed.searchParams.get('osmid'),'way/1');
+        for(const param of ['summary','limit','updated_since','bbox','osmids','id'])assert.equal(parsed.searchParams.has(param),false);
+        assert.equal(options.throwOnError,true);
+        await Promise.resolve();if(shouldFail)throw Error('API failed');
+        return [{id:'review/1',osmid:'way/1',body:'one'},{id:'review/2',osmid:'way/1',body:'two'}];
+    };
+    await Promise.all([maker.loadChangeReviewRows('way/1'),maker.loadChangeReviewRows('way/1')]);
+    assert.equal(gets,1,'overlapping requests to the same place are shared');
+    assert.equal(context.fixture.poiCont.adata.length,2);
+    shouldFail=true;await assert.rejects(()=>maker.loadChangeReviewRows('way/1'));shouldFail=false;
+    await maker.loadChangeReviewRows('way/1');assert.equal(gets,3,'failure is retryable');
+    const events=[{activityId:'review/1',osmId:'way/1'},{activityId:'review/2',osmId:'way/1'}];
+    controller.tickerItems=()=>events.map(e=>({...e,review:{body:context.fixture.poiCont.adata.find(r=>r.id===e.activityId).body}}));
+    maker.showChangeTicker();const config=calls.filter(c=>c[0]==='init').at(-1)[2];
+    const before=gets;const expanded=await config.detailsProvider(events);
+    assert.equal(gets,before+1,'two review events for one OSM object use one full-data request');
+    assert.equal(expanded[0].review.body,'one');assert.equal(expanded[1].review.body,'two');
+    console.log('PASS: startup changes and console preview reach the news ticker');
 })().catch(error => { console.error(error); process.exitCode = 1; });

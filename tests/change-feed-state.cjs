@@ -11,7 +11,7 @@ class Element {
  focus(){}
  querySelectorAll(selector){const found=[];const walk=node=>{if(node.className?.split(/\s+/).includes('changes-modal__item'))found.push(node);node.children?.forEach(walk);};walk(this);return found;}
 }
-const values=new Map();let requests=0,observer;
+const values=new Map();let requests=0,observer,detailsRequests=0;
 const context={Date,console,document:{createElement:tag=>new Element(tag),body:new Element('body')},
  window:{localStorage:{getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)},matchMedia:()=>({matches:true}),requestAnimationFrame:callback=>callback()},
  mapLibre:{getUserLocation:()=>null,map:{getCenter:()=>({lng:135,lat:34})}},
@@ -46,10 +46,31 @@ const groups=ticker.eventGroups();assert.equal(groups.length,2);assert.equal(gro
  assert.equal(ticker.unreadEvents().length,1); // A sliver at the edge is not enough.
  observer.callback([{target:displayed[1],isIntersecting:true,intersectionRatio:1}]);
  assert.equal(ticker.unreadEvents().length,0); // Scrolling through the cards clears all unread updates.
- const section=ticker.content.children[1];const details=section.children[1].children[1];
- details.open=true;details.listeners.toggle();
- assert.equal(ticker.content.querySelectorAll('.changes-modal__item').length,3);
+ const section=ticker.content.children[0];const details=section.children[1].children[1];
+ ticker.config.detailsProvider=async events=>{detailsRequests++;return events.map(event=>({...event,review:{title:'口コミ '+event.activityId,body:'個別の本文 '+event.activityId,excerpt:'短い要約',score:3}}));};
+ assert.equal(detailsRequests,0);
+ details.open=true;await details.listeners.toggle();
+ assert.equal(ticker.content.querySelectorAll('.changes-modal__item').length,4);
+ assert.equal(detailsRequests,1);
+ const inner=details.children.slice(1);
+ assert.equal(inner.length,2,'include the first review as well as all remaining reviews');
+ assert(inner.every(item=>item.children.find(node=>node.className?.split(/\s+/).includes('changes-modal__name')).textContent.startsWith('口コミ review/')));
+ assert(inner.every(item=>item.children.some(node=>node.className?.split(/\s+/).includes('changes-modal__review-body')&&node.textContent.startsWith('個別の本文'))));
+ details.open=false;await details.listeners.toggle();details.open=true;await details.listeners.toggle();
+ assert.equal(detailsRequests,1,'reopening uses the loaded review contents');
  ticker.markEventsSeen(events);assert.equal(ticker.unreadEvents().length,0);
+ ticker.renderList();
+ assert.ok(ticker.content.querySelectorAll('.changes-modal__item').every(item=>item.dataset.readState==='read'));
+ const retryDetails=ticker.content.children[0].children[1].children[1];
+ ticker.config.detailsProvider=async()=>{throw Error('Unavailable');};
+ retryDetails.open=true;await retryDetails.listeners.toggle();
+ assert.equal(retryDetails.dataset.loaded,undefined);
+ assert.equal(ticker.content.querySelectorAll('.changes-modal__item').length,2);
+ ticker.config.detailsProvider=async events=>events.map(event=>({...event,review:{title:'',body:'',visitDate:'2026-09-02',goodPoints:['静か','小さい子向き'],score:3}}));
+ retryDetails.open=false;await retryDetails.listeners.toggle();retryDetails.open=true;await retryDetails.listeners.toggle();
+ assert(retryDetails.children.slice(1).every(item=>!item.children.some(node=>node.className?.split(/\s+/).includes('changes-modal__name'))));
+ assert(retryDetails.children.slice(1).every(item=>item.children.some(node=>node.textContent==='訪問日 2026-09-02 · 静か · 小さい子向き')));
+ assert.equal(retryDetails.dataset.loaded,'true');
  ticker.setItems([...events,{...events[0],timestamp:400}]);assert.equal(ticker.unreadEvents().length,1);
  const other=new context.Ticker();other.config={seenStorageKey:'sample.seen'};other.currentEvents=events;assert.equal(other.unreadEvents().length,0);
  context.window.localStorage.getItem=()=>{throw new Error('Denied');};context.window.localStorage.setItem=()=>{throw new Error('Denied');};

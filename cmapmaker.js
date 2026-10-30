@@ -116,6 +116,22 @@ class CMapMaker extends IndoorControl {
         return this.detailLibrariesPromise;
     }
 
+    async loadChangeReviewRows(osmId) {
+        this.changeReviewRequests ??= new Map();
+        if (this.changeReviewRequests.has(osmId)) return this.changeReviewRequests.get(osmId);
+        const request = (async () => {
+            const url = new URL(Conf.activity.url, location.href);
+            ["summary", "limit", "updated_since", "bbox", "osmids", "id"].forEach(key => url.searchParams.delete(key));
+            url.searchParams.set("osmid", osmId);
+            const rows = await gSheet.get(url.href, { throwOnError: true });
+            poiCont.setActdata([...poiCont.adata.filter(row => row.osmid !== osmId), ...rows]);
+            return rows;
+        })();
+        this.changeReviewRequests.set(osmId, request);
+        try { return await request; }
+        finally { this.changeReviewRequests.delete(osmId); }
+    }
+
     showChangeTicker() {
         const setting = Conf.changes?.ticker;
         if (setting?.use !== true || !mapLibre.map) return;
@@ -127,18 +143,34 @@ class CMapMaker extends IndoorControl {
             buttonHosts: { desktop: "changesButtonDesktop", mobile: "changesButtonMobile" },
             seenStorageKey: `${Conf.etc?.localSave || "cmapmaker"}.changes-seen-items`,
             groupByPlace: true,
-            // Opening/reordering the panel must not initiate a refresh request.
-            itemsProvider: () => changesController.tickerItems(setting.maxItems),
+            // Fetch initial history only on an explicit opening; revisits reuse fetched results.
+            itemsProvider: async () => {
+                await changesController.loadInitialHistory?.();
+                return changesController.tickerItems(setting.maxItems);
+            },
+            detailsProvider: async events => {
+                const ids = [...new Set(events.filter(event => event.activityId
+                    && /^(node|way|relation)\/\d+$/.test(event.osmId || "")).map(event => event.osmId))];
+                await Promise.all(ids.map(id => this.loadChangeReviewRows(id)));
+                const reviews = new Map(changesController.tickerItems(setting.maxItems)
+                    .filter(event => event.activityId).map(event => [event.activityId, event]));
+                return events.map(event => {
+                    const updated = event.activityId ? reviews.get(event.activityId) || event : event;
+                    return updated.review ? { ...updated, review: { ...updated.review,
+                        goodPoints: (updated.review.goodPoints || []).map(key => glot.get?.(key) || key),
+                        visitDateLabel: glot.get?.("actdate") || "訪問日"
+                    } } : updated;
+                });
+            },
             onSelect: async (event) => {
                 if (!/^(node|way|relation)\/\d+$/.test(event.osmId || "")) return false;
                 if (event.activityId && !poiCont.adata.some(row => row.id === event.activityId)) {
-                    const url = new URL(Conf.activity.url, location.href);
-                    ["summary", "limit", "updated_since", "bbox", "osmids", "id"].forEach(key => url.searchParams.delete(key));
-                    url.searchParams.set("osmid", event.osmId);
-                    const rows = await gSheet.get(url.href, { throwOnError: true });
-                    poiCont.setActdata([...poiCont.adata.filter(row => row.osmid !== event.osmId), ...rows]);
+                    await this.loadChangeReviewRows(event.osmId);
                 }
-                await poiCont.select(event.osmId, true, 0, event.coordinates);
+                const selection = poiCont.select(event.osmId, true, 0, event.coordinates, { fromChanges: true });
+                // 座標で移動を始めたら、詳細取得を待たず地図を見せる。
+                if (event.coordinates) changeTicker.modalInstance?.hide();
+                await selection;
                 if (event.activityId) await this.viewDetail(event.osmId, event.activityId);
                 return true;
             },
@@ -153,7 +185,7 @@ class CMapMaker extends IndoorControl {
     async autoShowChangeModal(regionCode) {
         const setting = Conf.changes?.ticker;
         if (Conf.changes?.use !== true || setting?.use !== true || setting.autoOpen === false
-            || !regionCode || this.changeAutoOpening || changeTicker.isOpen || changeTicker.opening) return false;
+            || changesController.initialVisit || !regionCode || this.changeAutoOpening || changeTicker.isOpen || changeTicker.opening) return false;
         this.changeAutoOpening = true;
         try {
             const map = mapLibre.map;
@@ -189,7 +221,6 @@ class CMapMaker extends IndoorControl {
                 changesController.results = [];
                 changeTicker.hide();
                 await changesController.checkOnStartup();
-                await changesController.checkActivityChanges?.(Conf.activity);
                 this.displayedChangeRegion = region.code;
                 this.showChangeTicker();
                 await this.autoShowChangeModal(region.code);
@@ -238,13 +269,12 @@ class CMapMaker extends IndoorControl {
 
         changesController.config = Conf.changes ?? {};
         const changeResult = await changesController.checkOnStartup();
-        await changesController.checkActivityChanges?.(Conf.activity);
         this.displayedChangeRegion = changesController.read?.(changesController.key("last-region"));
         if (Conf.changes?.ticker?.use === true) {
             this.showChangeTicker();
-            await this.autoShowChangeModal(this.displayedChangeRegion);
+            if (changeResult.state !== "first" && !shownToday) await this.autoShowChangeModal(this.displayedChangeRegion);
         }
-        if (Conf.changes?.ticker?.use === true && changesController.results.length) {
+        if (changeResult.state !== "first" && Conf.changes?.ticker?.use === true && changesController.results.length) {
             intro.hidden = true;
             return;
         }
@@ -470,6 +500,7 @@ class CMapMaker extends IndoorControl {
                         if (ready) cMapMaker.viewPoi(listTable.getSelCategory());
                     }).catch(error => console.warn("MapFeature3D: marker refresh failed", error));
                     mapLibre.addControl("top-left", "baselist", basehtml, "mapLibre-control m-0 p-0"); // Make: base list
+                    document.querySelector(".basemenu")?.classList.toggle("category-secondary", Conf.searchUi?.categoryPresentation === "secondary");
                     setBGImage(Conf.listTable.backgroundImage)
                     mapLibre.addControl("bottom-right", "dummy", " ", "");
 
@@ -667,6 +698,7 @@ class CMapMaker extends IndoorControl {
         let msg = glot.get("about_message");
         msg = msg.replace(/\n/g, "<br>")  // 改行コードを<br>に変換
         msg = "<span class=`fs-5`>" + msg + "</span>"
+        if (Conf.areaSearch?.use === true) msg += `<p class="mt-3 mb-0"><button type="button" class="participation-link fs-6" onclick="areaSearchController.open('research')" aria-haspopup="dialog" aria-controls="poiFilterModal">${glot.get("contribute_firstTime")}</button></p>`;
         mapLibre.viewMiniMap(false)
         winCont.makeDetail({ "title": glot.get("about"), "message": msg, "mode": "close", "menu": false })
         cMapMaker.changeMode("map")
@@ -1203,6 +1235,17 @@ class CMapMaker extends IndoorControl {
                     });
             }
         })
+    }
+
+    syncPoiStatus(osmid) {
+        const record = poiStatusCont.getRecord(osmid);
+        for (const kind of ["visited", "favorite"]) {
+            const button = document.getElementById(kind);
+            if (!button || button.name !== osmid) continue;
+            button.setAttribute("aria-pressed", String(record[kind]));
+            button.querySelector("i")?.classList.toggle("fa-solid", record[kind]);
+            button.querySelector("i")?.classList.toggle("fa-regular", !record[kind]);
+        }
     }
 
     togglePoiStatus(id) {

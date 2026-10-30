@@ -118,7 +118,8 @@ class OSMbasic {
             const entries = [["female", "capacity:women", `🚺 ${glot.get("toilet_female")}`],
                 ["male", "capacity:men", `🚹 ${glot.get("toilet_male")}`],
                 ["unisex", "capacity:unisex", `🚻 ${glot.get("toilet_unisex")}`]];
-            const known = entries.filter(([key]) => tags[key] === "yes" || tags[key] === "no");
+            const known = entries.filter(([key, capacityKey]) => tags[key] === "yes" || tags[key] === "no"
+                || (Number.isFinite(Number(tags[capacityKey])) && Number(tags[capacityKey]) > 0));
             if (!known.length) {
                 html += `<div class="flex-row mt-1 me-3">${glot.get("toilet_unknown")}</div>`;
             }
@@ -209,6 +210,7 @@ class OSMbasic {
         const play = new Map();
         const other = new Map();
         const toilets = [];
+        const toiletIds = [];
         const seen = new Set();
         for (const item of linked) {
             const id = String(item?.featureId ?? "");
@@ -219,6 +221,7 @@ class OSMbasic {
                 ? properties.tags : properties;
             if (tags.amenity === "toilets") {
                 toilets.push(tags);
+                if (/^(node|way|relation)\/\d+$/.test(id)) toiletIds.push(id);
                 continue;
             }
             const category = poiCont.getCatnames(tags);
@@ -245,6 +248,10 @@ class OSMbasic {
                     ? "facility_wheelchair_yes" : "facility_wheelchair_limited"))}</li>`);
             if (toilets.some(tags => tags.changing_table === "yes"))
                 details.push(`<li>${escapeHtml(glot.get("facility_changing_table"))}</li>`);
+            toiletIds.forEach((id, index) => {
+                const label = glot.get("facility_toilet_details") + (toiletIds.length > 1 ? ` ${index + 1}` : "");
+                details.push(`<li><button type="button" class="btn btn-link btn-sm p-0" onclick="poiCont.select('${id}', true)">${escapeHtml(label)}</button></li>`);
+            });
             items.push(`<li>${escapeHtml(toilets.length === 1 ? glot.get("facility_toilet")
                 : glot.get("facility_toilet_count").replace("{count}", String(toilets.length)))}`
                 + (details.length ? `<ul>${details.join("")}</ul>` : "") + "</li>");
