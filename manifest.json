@@ -36,6 +36,7 @@
             "parallel": false,
             "scripts": [
                 "./lib/appmodal.js",
+                "./lib/imageviewer.js",
                 "./lib/documentpreview.js",
                 "./lib/siteupdates.js",
                 "./lib/changecontroller.js",
