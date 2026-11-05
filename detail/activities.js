@@ -96,7 +96,7 @@ class Activities {
         actlists.sort((a, b) => {
             return a.updatetime < b.updatetime ? -1 : 1;
         }); // sort by update.
-        result = DocumentPreview.render(actlists) + modalActs.makeActivityList(actlists);
+        result = modalActs.makeActivityList(actlists);
         actlists.forEach((act, idx) => {
             if (act.id !== "") {
                 let clone = template.querySelector("div.body").cloneNode(true);
@@ -117,6 +117,7 @@ class Activities {
                 result += clone.outerHTML;
             }
         });
+        result += DocumentPreview.render(actlists);
         setTimeout(() => {
             wikimq.forEach((q) => { wikimedia.getWikiMediaImage(q[0], Conf.thumbnail.modalThumbWidth, q[1]); }); // WikiMedia Image 遅延読み込み
         }, 500)
