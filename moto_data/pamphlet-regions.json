@@ -1,0 +1,317 @@
+{
+  "imageSize": [
+    6172,
+    2924
+  ],
+  "coordinateFormat": "region = [x, y, width, height]; normalized 0..1, origin top-left",
+  "source": "Public activities API read on 2026-11-06 JST; regions manually identified from JPG",
+  "venues": [
+    {
+      "number": 1,
+      "name": "ミュージックハウスDJ",
+      "osmid": "node/9817343475",
+      "pixelRegion": [
+        60,
+        60,
+        1899,
+        1275
+      ],
+      "value": {
+        "image": "./moto_data/Higayodo2.jpg",
+        "region": [
+          0.009721,
+          0.02052,
+          0.30768,
+          0.436047
+        ]
+      },
+      "activityIds": [
+        "higayodo_artfes_2026/0001",
+        "higayodo_artfes_2026/0002",
+        "higayodo_artfes_2026/0003",
+        "higayodo_artfes_2026/0004",
+        "higayodo_artfes_2026/0005",
+        "higayodo_artfes_2026/0006"
+      ]
+    },
+    {
+      "number": 2,
+      "name": "株式会社上一木材",
+      "osmid": "way/1112592094",
+      "pixelRegion": [
+        105,
+        1341,
+        1854,
+        633
+      ],
+      "value": {
+        "image": "./moto_data/Higayodo2.jpg",
+        "region": [
+          0.017012,
+          0.458618,
+          0.300389,
+          0.216484
+        ]
+      },
+      "activityIds": [
+        "higayodo_artfes_2026/0007",
+        "higayodo_artfes_2026/0008",
+        "higayodo_artfes_2026/0009"
+      ]
+    },
+    {
+      "number": 3,
+      "name": "上新庄駅（旧町名継承碑「烏頭町」前）",
+      "osmid": "node/7795996208",
+      "pixelRegion": [
+        60,
+        1869,
+        1206,
+        1025
+      ],
+      "value": {
+        "image": "./moto_data/Higayodo2.jpg",
+        "region": [
+          0.009721,
+          0.639193,
+          0.195399,
+          0.350547
+        ]
+      },
+      "activityIds": [
+        "higayodo_artfes_2026/0010",
+        "higayodo_artfes_2026/0011",
+        "higayodo_artfes_2026/0012"
+      ]
+    },
+    {
+      "number": 4,
+      "name": "coffee halo コーヒーハロ",
+      "osmid": "node/11765930909",
+      "pixelRegion": [
+        1260,
+        2005,
+        699,
+        844
+      ],
+      "value": {
+        "image": "./moto_data/Higayodo2.jpg",
+        "region": [
+          0.204148,
+          0.685705,
+          0.113253,
+          0.288646
+        ]
+      },
+      "activityIds": [
+        "higayodo_artfes_2026/0013",
+        "higayodo_artfes_2026/0014"
+      ]
+    },
+    {
+      "number": 5,
+      "name": "bar Lilac",
+      "osmid": "node/14314407225",
+      "pixelRegion": [
+        2064,
+        452,
+        980,
+        588
+      ],
+      "value": {
+        "image": "./moto_data/Higayodo2.jpg",
+        "region": [
+          0.334413,
+          0.154583,
+          0.158782,
+          0.201094
+        ]
+      },
+      "activityIds": [
+        "higayodo_artfes_2026/0015",
+        "higayodo_artfes_2026/0016",
+        "higayodo_artfes_2026/0017",
+        "higayodo_artfes_2026/0018"
+      ],
+      "relatedRegions": [
+        {
+          "label": "5・6共通の出展作家紹介",
+          "image": "./moto_data/Higayodo2.jpg",
+          "region": [
+            0.495625,
+            0.154583,
+            0.170933,
+            0.603283
+          ]
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "name": "食堂わっか",
+      "osmid": "node/12296672565",
+      "pixelRegion": [
+        2064,
+        1055,
+        980,
+        769
+      ],
+      "value": {
+        "image": "./moto_data/Higayodo2.jpg",
+        "region": [
+          0.334413,
+          0.360807,
+          0.158782,
+          0.262996
+        ]
+      },
+      "activityIds": [
+        "higayodo_artfes_2026/0019",
+        "higayodo_artfes_2026/0020",
+        "higayodo_artfes_2026/0021",
+        "higayodo_artfes_2026/0022",
+        "higayodo_artfes_2026/0023",
+        "higayodo_artfes_2026/0024",
+        "higayodo_artfes_2026/0025"
+      ],
+      "relatedRegions": [
+        {
+          "label": "5・6共通の出展作家紹介",
+          "image": "./moto_data/Higayodo2.jpg",
+          "region": [
+            0.495625,
+            0.154583,
+            0.170933,
+            0.603283
+          ]
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "name": "珈琲食堂 クモノキレマ",
+      "osmid": "node/14314403682",
+      "pixelRegion": [
+        2064,
+        1854,
+        2035,
+        1010
+      ],
+      "value": {
+        "image": "./moto_data/Higayodo2.jpg",
+        "region": [
+          0.334413,
+          0.634063,
+          0.329715,
+          0.345417
+        ]
+      },
+      "activityIds": [
+        "higayodo_artfes_2026/0026",
+        "higayodo_artfes_2026/0027"
+      ]
+    },
+    {
+      "number": 8,
+      "name": "トラットリア モンテネーゼ",
+      "osmid": "node/7487254925",
+      "pixelRegion": [
+        4159,
+        60,
+        1944,
+        679
+      ],
+      "value": {
+        "image": "./moto_data/Higayodo2.jpg",
+        "region": [
+          0.67385,
+          0.02052,
+          0.314971,
+          0.232216
+        ]
+      },
+      "activityIds": [
+        "higayodo_artfes_2026/0028",
+        "higayodo_artfes_2026/0029"
+      ]
+    },
+    {
+      "number": 9,
+      "name": "モリカフェ MORICAFE",
+      "osmid": "node/3916117306",
+      "pixelRegion": [
+        4159,
+        769,
+        1281,
+        934
+      ],
+      "value": {
+        "image": "./moto_data/Higayodo2.jpg",
+        "region": [
+          0.67385,
+          0.262996,
+          0.20755,
+          0.319425
+        ]
+      },
+      "activityIds": [
+        "higayodo_artfes_2026/0030",
+        "higayodo_artfes_2026/0031"
+      ]
+    },
+    {
+      "number": 10,
+      "name": "Salon de GAKU",
+      "osmid": "node/14305724328",
+      "pixelRegion": [
+        5449,
+        723,
+        669,
+        1357
+      ],
+      "value": {
+        "image": "./moto_data/Higayodo2.jpg",
+        "region": [
+          0.882858,
+          0.247264,
+          0.108393,
+          0.46409
+        ]
+      },
+      "activityIds": [
+        "higayodo_artfes_2026/0032",
+        "higayodo_artfes_2026/0033"
+      ]
+    },
+    {
+      "number": 11,
+      "name": "喫茶サボテン",
+      "osmid": "node/14305724327",
+      "pixelRegion": [
+        4159,
+        1733,
+        1944,
+        1131
+      ],
+      "value": {
+        "image": "./moto_data/Higayodo2.jpg",
+        "region": [
+          0.67385,
+          0.592681,
+          0.314971,
+          0.386799
+        ]
+      },
+      "activityIds": [
+        "higayodo_artfes_2026/0034",
+        "higayodo_artfes_2026/0035"
+      ]
+    }
+  ],
+  "notes": [
+    "Regions are manually selected rectangular initial viewing ranges, not exact article outlines. Neighboring content may be visible.",
+    "Venues 5 and 6 have a shared artist section; its viewing range is included separately.",
+    "OSMIDs are taken from the current app API, not independently verified against OSM. Venue 3 API also associates an activity at another address with this OSMID; the coordinates here refer to the numbered venue.",
+    "value is a proposed JSON value for a dedicated generic text field; no DB or frontend feature changes have been made."
+  ]
+}

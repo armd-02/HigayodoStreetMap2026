@@ -91,3 +91,11 @@ assert.equal(context.Conf.activity.targetName, 'custom');
 assert.equal(context.Conf.areaFeatureLinker.use, true);
 assert.equal(context.Conf.feature3d.use, true);
 console.log('PASS: Higayodo backend settings, legacy GAS compatibility, disabled dedicated services, and explicit opt-in');
+
+context.Conf = {};
+context.maker.prepareConfig();
+assert.equal(context.Conf.documentPreview.use, false, 'document previews are opt-in');
+context.Conf.documentPreview = { use: true, field: 'custom_document' };
+context.maker.prepareConfig();
+assert.equal(context.Conf.documentPreview.use, true);
+assert.equal(context.Conf.documentPreview.field, 'custom_document');

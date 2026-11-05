@@ -1,4 +1,8 @@
 {
+    "documentPreview": {
+        "use": true,
+        "field": "document_preview"
+    },
     "siteUpdates": {
         "use": false
     },

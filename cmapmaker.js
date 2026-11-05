@@ -348,7 +348,7 @@ class CMapMaker extends IndoorControl {
         };
         // Dedicated applications opt in to new services and area/model definitions.
         for (const name of ["news", "changes", "intro", "siteUpdates", "areaFeatureLinker", "areaSearch",
-            "discovery", "listActions", "feature3d", "directions"]) {
+            "discovery", "listActions", "feature3d", "directions", "documentPreview"]) {
             Conf[name] = { use: false, ...Conf[name] };
         }
     }

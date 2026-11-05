@@ -21,6 +21,7 @@ class Activities {
         let makehtml = function (form, act) {
             let chtml = "";
             Object.keys(form).forEach((key) => {
+                if (form[key].gsheet === Conf.documentPreview?.field && Conf.documentPreview?.use === true) return;
                 if (form[key].viewHidden !== true) {
                     //chtml += `<div class='row'>`;
                     let gdata = act[form[key].gsheet] == undefined ? "" : String(act[form[key].gsheet]);
@@ -95,7 +96,7 @@ class Activities {
         actlists.sort((a, b) => {
             return a.updatetime < b.updatetime ? -1 : 1;
         }); // sort by update.
-        result = modalActs.makeActivityList(actlists);
+        result = DocumentPreview.render(actlists) + modalActs.makeActivityList(actlists);
         actlists.forEach((act, idx) => {
             if (act.id !== "") {
                 let clone = template.querySelector("div.body").cloneNode(true);
