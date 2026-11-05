@@ -33,9 +33,10 @@ assert.equal(prepared.activity.local.use, true);
 assert.ok(prepared.activity.local.hosts.includes('127.0.0.1'));
 assert.equal(new URL(prepared.activity.local.url).hostname, '127.0.0.1');
 for (const name of ['news', 'changes', 'intro', 'areaFeatureLinker', 'areaSearch',
-    'discovery', 'listActions', 'directions']) {
+    'discovery', 'listActions']) {
     assert.equal(prepared[name].use, false, `${name} requires opt-in`);
 }
+assert.equal(prepared.directions.use, true, 'venue directions are explicitly enabled for this site');
 assert.equal(prepared.feature3d.use, true);
 vm.runInContext(fs.readFileSync('lib/playgroundmodels3d.js', 'utf8') + '\nthis.factories = PlaygroundModelFactories;', context);
 vm.runInContext(fs.readFileSync('lib/mapfeature3d.js', 'utf8') + '\nthis.modelLayer = new MapFeature3D({ modelFactories: this.factories });', context);
@@ -95,6 +96,7 @@ console.log('PASS: Higayodo backend settings, legacy GAS compatibility, disabled
 context.Conf = {};
 context.maker.prepareConfig();
 assert.equal(context.Conf.documentPreview.use, false, 'document previews are opt-in');
+assert.equal(context.Conf.directions.use, false, 'directions remain disabled when not configured');
 context.Conf.documentPreview = { use: true, field: 'custom_document' };
 context.maker.prepareConfig();
 assert.equal(context.Conf.documentPreview.use, true);

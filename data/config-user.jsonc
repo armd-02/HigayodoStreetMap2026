@@ -1,4 +1,7 @@
 {
+    "directions": {
+        "use": true
+    },
     "mapImageLinks": {
         "use": true,
         "minZoom": 13,
