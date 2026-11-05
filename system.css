@@ -1880,3 +1880,13 @@ img.slide { flex: 0 0 auto; }
 .image-viewer-stage img { position:absolute; top:0; left:0; max-width:none; max-height:none; width:auto; height:auto; transform-origin:0 0; user-select:none; pointer-events:none; }
 .image-viewer-status { position:absolute; inset:40% 10% auto; text-align:center; }
 .document-preview:focus-visible,.image-viewer button:focus-visible { outline:3px solid #169be8; outline-offset:2px; }
+
+/* Image-link boards are attached to map coordinates, with separate thumbnail assets. */
+.map-image-links { padding:5px; border:1px solid #78664c; border-radius:7px; background:rgba(255,252,242,.96); color:#443a2b; box-shadow:0 2px 5px #0003; text-align:center; }
+.map-image-links-title { display:block; margin:0 0 3px; font-size:11px; font-weight:bold; line-height:1.3; }
+.map-image-links-items { display:flex; gap:5px; }
+.map-image-link { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; width:76px; min-height:49px; padding:3px; border:1px solid #cfbea0; border-radius:4px; background:#fff; color:#304d64; font:11px/1.3 sans-serif; cursor:pointer; touch-action:manipulation; }
+.map-image-link span { font:inherit; white-space:nowrap; }
+.map-image-link img { display:block; width:68px; height:32px; object-fit:contain; }
+.map-image-link:focus-visible { outline:3px solid #169be8; outline-offset:2px; }
+.map-image-link:hover { background:#fff8e8; }

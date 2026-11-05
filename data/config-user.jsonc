@@ -1,4 +1,30 @@
 {
+    "mapImageLinks": {
+        "use": true,
+        "minZoom": 13,
+        "maxZoom": 19,
+        "items": [
+            {
+                "coordinates": [
+                    135.5297,
+                    34.7426
+                ],
+                "titleKey": "map_documents_title",
+                "links": [
+                    {
+                        "titleKey": "map_documents_map",
+                        "image": "./moto_data/HIgayodo1.jpg",
+                        "thumbnail": "./image/higayodo-pamphlet-map-thumb.jpg"
+                    },
+                    {
+                        "titleKey": "map_documents_program",
+                        "image": "./moto_data/Higayodo2.jpg",
+                        "thumbnail": "./image/higayodo-pamphlet-program-thumb.jpg"
+                    }
+                ]
+            }
+        ]
+    },
     "documentPreview": {
         "use": true,
         "field": "document_preview"

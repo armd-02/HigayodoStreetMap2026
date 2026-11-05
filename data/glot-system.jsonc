@@ -1,4 +1,7 @@
 {
+    "map_documents_title": {"ja":"パンフレット", "en":"Brochure"},
+    "map_documents_map": {"ja":"会場マップ", "en":"Venue map"},
+    "map_documents_program": {"ja":"イベント紹介", "en":"Program"},
     "image_viewer_region": {"ja": "掲載部分", "en": "Selected area"},
     "image_viewer_whole": {"ja": "全体", "en": "Whole image"},
     "image_viewer_zoomIn": {"ja": "拡大 ＋", "en": "Zoom in +"},

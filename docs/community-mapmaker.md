@@ -138,3 +138,7 @@ DBには専用の任意入力textareaを用意し、APIがその値を返すよ�
 画像の拡大表示は `lib/imageviewer.js` の `ImageViewer` に共通化しています。通常の写真・Wikimedia画像も `Activities.viewImage()` から同じビューアを開きます。`ImageViewer.open({image, region?, title?})` は範囲指定があると掲載部分、ないと画像全体を初期表示します。「掲載部分」ボタンは範囲指定時だけ表示します。「等倍」で原寸表示できます。資料の設定・JSON解析・縮小画像の生成は `DocumentPreview` に残しています。
 
 共通画像ビューアのボタンは「全体／等倍」の切替、閉じる、範囲指定時の「掲載部分」です。ボタンは画像上に重ね、画像領域の高さを確保します。拡大縮小はピンチ・ホイール・キーボードで操作できます。
+
+### 地図上の画像リンク
+
+`mapImageLinks.use` を有効にすると、`items` の各 `coordinates: [経度, 緯度]` に画像リンクの案内板を置けます。初期設定は無効です。各案内板の `title` / `titleKey` と `links` の各 `title` / `titleKey`、`image`、`thumbnail` を設定します。`image` は共通ビューアで開く画像、`thumbnail` は地図上で使う軽量画像です。省略時は `image` を使います。`region` で初期拡大範囲も指定できます。`minZoom` / `maxZoom`（上限を含まない）は全体または案内板ごとに指定でき、`use: false` の項目は表示しません。位置や画像は共通コードに埋め込みません。案内板は地図と一緒に移動し、会場の実在する配布場所を表すものではありません。
