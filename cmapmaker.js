@@ -5,6 +5,7 @@
 var Conf = {}; // Config Praams
 const LANG = window.APP_LANGUAGE || ((window.navigator.languages?.[0] || window.navigator.language || window.navigator.userLanguage || window.navigator.browserLanguage || "en").toLowerCase().startsWith("ja") ? "ja" : "en");
 const MAP_TITLE_DISPLAY_DELAY_MS = 500;
+const MAP_MOVE_SETTLE_DELAY_MS = 300;
 const glot = new Glottologist();
 glot.lang = LANG;
 let modalActs = null;
@@ -85,6 +86,10 @@ class CMapMaker extends IndoorControl {
         this.mode = "map";
         this.moveMapBusy = false;
         this.moveMapPending = false;
+        this.moveMapTimer = null;
+        this.lastMapMoveEnd = 0;
+        this.activeViewUpdate = null;
+        this.pendingExplicitView = null;
         this.changeKeywordWaitTime;
         this.scrollHints = 0;
         this.thumbnailRowsKey = "";
@@ -348,7 +353,7 @@ class CMapMaker extends IndoorControl {
         };
         // Dedicated applications opt in to new services and area/model definitions.
         for (const name of ["news", "changes", "intro", "siteUpdates", "areaFeatureLinker", "areaSearch",
-            "discovery", "listActions", "feature3d", "directions", "documentPreview", "mapImageLinks"]) {
+            "discovery", "listActions", "feature3d", "stampMarkers", "directions", "documentPreview", "mapImageLinks"]) {
             Conf[name] = { use: false, ...Conf[name] };
         }
     }
@@ -400,17 +405,21 @@ class CMapMaker extends IndoorControl {
             if (!Conf.static.use) return;
 
             console.log("cMapMaker: Static mode");
-            const datas = await Promise.all(Conf.static.osmjsons.map(async (url) => {
+            // Process one file at a time instead of retaining every response body.
+            for (const url of Conf.static.osmjsons) {
                 const response = await fetch(window.withAppAssetVersion(url));
                 if (!response.ok) throw new Error(`Static data load failed: ${url} (${response.status})`);
-                return response.text();
-            }));
-
-            datas.forEach(data => {
-                let json = JSON5.parse(data)
-                let ovanswer = overPassCont.setOsmJson(json);
-                poiCont.addGeojson(ovanswer);
-            })
+                const data = await response.text();
+                let json;
+                try {
+                    json = await overPassCont.parseOverpassJsonAsync(data);
+                } catch {
+                    // Existing static sources may contain JSON5 comments or trailing commas.
+                    json = JSON5.parse(data);
+                }
+                const ovanswer = await overPassCont.setOsmJson(json);
+                poiCont.addGeojson(ovanswer, { source: "static" });
+            }
             poiCont.setActlnglat();
             console.log("cMapMaker: Static load done.");
         }
@@ -477,7 +486,8 @@ class CMapMaker extends IndoorControl {
                     && Conf.tile[UrlParams.category]) {
                     Conf.map.tileName = UrlParams.category;
                 }
-                if (UrlParams.edit) Conf.etc["editMode"] = true;
+                this.editModeSwitchEnabled = Conf.etc.editModeSwitch ?? !Conf.etc.editMode;
+                if (this.editModeSwitchEnabled && UrlParams.edit !== undefined && basic.parseBoolean(UrlParams.edit) === true) Conf.etc.editMode = true;
                 if (UrlParams.static !== undefined) {
                     const staticMode = basic.parseBoolean(UrlParams.static);
                     if (staticMode !== null) Conf.static.use = staticMode;
@@ -500,6 +510,10 @@ class CMapMaker extends IndoorControl {
                         if (ready) cMapMaker.viewPoi(listTable.getSelCategory());
                     }).catch(error => console.warn("MapFeature3D: marker refresh failed", error));
                     mapLibre.addControl("top-left", "baselist", basehtml, "mapLibre-control m-0 p-0"); // Make: base list
+                    mapLibre.addControl("top-left", "eventDates",
+                        '<div id="eventDateFilter" class="event-date-filter" role="group" aria-label="イベント日付" hidden></div>',
+                        "event-date-control");
+                    winCont.enableHorizontalDrag(document.getElementById("eventDateFilter"));
                     document.querySelector(".basemenu")?.classList.toggle("category-secondary", Conf.searchUi?.categoryPresentation === "secondary");
                     setBGImage(Conf.listTable.backgroundImage)
                     mapLibre.addControl("bottom-right", "dummy", " ", "");
@@ -523,6 +537,26 @@ class CMapMaker extends IndoorControl {
                     cMapMaker.showMapTitleWhenReady(mapLibre.selectStyle);
                     const mergedMenu = [...Conf.menu.main, ...Conf.menu.mainSystem];
                     winCont.menu_make(mergedMenu, "main_menu");
+                    if (Conf.areaSearch.use === true || Conf.etc.localSave) {
+                        document.getElementById("main_menu").insertAdjacentHTML("afterbegin", `
+                            <button class="dropdown-item d-flex align-items-center gap-2" type="button"
+                                id="poiFilterButton" onclick="poiFilterController.open('search')"
+                                aria-haspopup="dialog" aria-controls="poiFilterModal">
+                                <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+                                <span glot-model="placeFilter_title"></span>
+                            </button>
+                            <div class="dropdown-divider"></div>`);
+                    }
+                    if (this.editModeSwitchEnabled && Object.keys(Conf.poiView.editZoom ?? {}).length
+                        && !document.getElementById("editModeButton")) {
+                        document.getElementById("main_menu").insertAdjacentHTML("afterbegin", `
+                            <button class="dropdown-item d-flex align-items-center gap-2" type="button"
+                                id="editModeButton" onclick="cMapMaker.setEditMode(!Conf.etc.editMode)"
+                                role="menuitemcheckbox" aria-checked="${Boolean(Conf.etc.editMode)}">
+                                <i id="editModeIndicator" class="fa-solid ${Conf.etc.editMode ? 'fa-check' : 'fa-pen-to-square'}" aria-hidden="true"></i>
+                                <span glot-model="editMode_label"></span>
+                            </button>`);
+                    }
                     winCont.mouseDragScroll(images, cMapMaker.eventViewThumb); // set Drag Scroll on images
                     winCont.initSidebarResize();
                     glot.render();
@@ -533,18 +567,24 @@ class CMapMaker extends IndoorControl {
                         }
                     });
                     areaSearchController.init();
-                    const filterButton = document.getElementById("poiFilterButton");
-                    if (filterButton) filterButton.hidden = Conf.areaSearch.use !== true && !Conf.etc.localSave;
                     const listModes = document.querySelector(".place-list-mode");
                     if (listModes) listModes.hidden = !Conf.etc.localSave;
                     listActions.init(Conf.listActions ?? Conf.system?.listActions);
                     list_keyword.setAttribute("placeholder", glot.get("searchKeyword"));
                     listTitle.innerHTML = glot.get("listTitle");
                     let resizeWaitTime;
+                    const isFormInputFocused = () => {
+                        const active = document.activeElement;
+                        return ["INPUT", "TEXTAREA", "SELECT"].includes(active?.tagName)
+                            || active?.isContentEditable === true;
+                    };
                     window.onresize = () => { // 画面サイズに合わせたコンテンツ表示切り替え
-                        winCont.resizeWindow();
                         clearTimeout(resizeWaitTime);
+                        // ソフトキーボードによる高さ変更では、入力欄を含むパネルを再配置しない。
+                        if (isFormInputFocused()) return;
+                        winCont.resizeWindow();
                         resizeWaitTime = setTimeout(() => {
+                            if (isFormInputFocused()) return;
                             winCont.setSidebar("redraw").then(() => {
                                 cMapMaker.makeImages(Conf.thumbnail.use);
                             });
@@ -653,7 +693,7 @@ class CMapMaker extends IndoorControl {
                         if (!Conf.activity.url || activities.length === 0) return;
                         poiCont.setActdata(activities);
 
-                        if (Conf.poiView.poiActLoad && !Conf.static.use) {
+                        if (Conf.poiView.poiActLoad && (!Conf.static.use || Conf.etc.editMode)) {
                             const osmids = activities.map((act) => act.osmid).filter(Boolean);
                             if (osmids.length > 0) {
                                 try {
@@ -684,6 +724,7 @@ class CMapMaker extends IndoorControl {
     }
 
     addEvents() {
+        mapLibre.on('movestart', this.eventStartMoveMap.bind(cMapMaker));
         mapLibre.on('moveend', this.eventMoveMap.bind(cMapMaker))   		// マップ移動時の処理
         mapLibre.on('moveend', () => newsTicker.update())
         mapLibre.on('zoomend', this.eventZoomMap.bind(cMapMaker))			// ズーム終了時に表示更新
@@ -693,6 +734,25 @@ class CMapMaker extends IndoorControl {
             event.preventDefault();
             cMapMaker.searchKeyword(list_keyword.value);
         });
+    }
+
+    selectEventDate(date) {
+        const config = Conf.eventDateFilter;
+        if (config?.use !== true) return;
+        if (!date) {
+            list_category.value = "";
+            list_keyword.value = "";
+        } else if (!listTable.getSelCategory().includes(config.category)) {
+            list_category.value = config.category;
+            list_keyword.value = "";
+        }
+        listTable.eventDate = date;
+        this.refreshLocalFilters();
+        this.clearDatail();
+        geoCont.writePoiCircle();
+        areaSearchController.renderDisplayStatus();
+        this.changeMode("list");
+        winCont.setSidebar("list", date ? 0.65 : 0.35);
     }
 
     // about Map
@@ -767,6 +827,47 @@ class CMapMaker extends IndoorControl {
         setTimeout(() => { globalMessage.innerHTML = "" }, 4000)
     }
 
+    async setEditMode(enabled) {
+        if (!this.editModeSwitchEnabled || this.editModeChanging || enabled === Boolean(Conf.etc.editMode)) return false;
+        this.editModeChanging = true;
+        const button = document.getElementById("editModeButton");
+        if (button) button.disabled = true;
+        try {
+            if (this.mode === "edit") {
+                const confirmed = await new Promise(resolve => winCont.confirm({
+                    title: glot.get("confirmCloseTitle"), message: glot.get("confirmCloseDetail"), callback: resolve
+                }));
+                if (!confirmed) return false;
+            }
+            // Invalidate an in-flight update before changing which data is visible.
+            ++this.updateViewRequestId;
+            Conf.etc.editMode = Boolean(enabled);
+            ++poiCont.revision;
+            poiCont.cat_cache = {};
+            const indicator = document.getElementById("editModeIndicator");
+            if (indicator) indicator.className = `fa-solid ${enabled ? "fa-check" : "fa-pen-to-square"}`;
+            if (button) button.setAttribute("aria-checked", String(Conf.etc.editMode));
+            this.clearDatail();
+            this.changeMode("list");
+            list_category.value = "";
+            list_keyword.value = "";
+            const url = new URL(location.href);
+            url.searchParams.delete("category");
+            if (enabled) url.searchParams.set("edit", "true");
+            else url.searchParams.delete("edit");
+            history.replaceState("", "", url.pathname + url.search + url.hash);
+            this.refreshLocalFilters();
+            await this.updateView();
+            return true;
+        } catch (error) {
+            console.warn("cMapMaker: edit mode update failed", error);
+            return false;
+        } finally {
+            this.editModeChanging = false;
+            if (button) button.disabled = false;
+        }
+    }
+
     getPoiZoom(target) {
         const defaultZoom = Conf.poiView?.poiZoom?.[target];
         const isMobile = basic.isSmartPhone()
@@ -788,7 +889,7 @@ class CMapMaker extends IndoorControl {
     }
 
     refreshLocalFilters() {
-        // Personal filters change presentation, not the loaded geographic extent.
+        // Category/personal filters can immediately reuse the loaded data.
         listTable.makeList(false);
         listTable.filterByPoiStatus(this.visitedFilterStatus, this.favoriteFilter, false);
         listTable.renderList();
@@ -800,7 +901,10 @@ class CMapMaker extends IndoorControl {
     }
 
     viewArea() {			// Area(敷地など)を表示させる refタグがあれば()表記
-        let targets = poiCont.getTargets()  //
+        const started = performance.now();
+        const stages = [];
+        const activeTargets = new Set(poiCont.getTargets());
+        let targets = [...new Set([...activeTargets, ...Object.keys(Conf.poiView.editZoom ?? {})])];
         console.log("viewArea: " + targets.join())
         targets.forEach((target) => {
             const osmConf = Conf.osm[target]
@@ -808,14 +912,21 @@ class CMapMaker extends IndoorControl {
             if (osmConf.expression.viewArea) {   // viewArea: trueが対象
                 if (osmConf.expression.renderer !== "indoor"
                     && mapLibre.isPolygonSourceCurrent(target, poiCont.revision)) return;
-                let pois = poiCont.getPois(target, false)
+                const targetStarted = performance.now();
+                let pois = activeTargets.has(target) ? poiCont.getPois(target, false)
+                    : { geojson: [], targets: [], lnglat: [] };
                 if (osmConf.expression.renderer === "indoor") {
                     const controlPois = poiCont.getPois("-", false);
+                    const contextStarted = performance.now();
                     this.syncIndoorLevelControl(controlPois.geojson, controlPois.targets);
+                    const renderStarted = performance.now();
                     mapLibre.addIndoor({
                         "type": "FeatureCollection",
                         "features": this.getIndoorRenderFeatures(pois)
                     }, target, this.indoorLevel);
+                    stages.push({ target, prepareMs: Math.round(contextStarted - targetStarted),
+                        contextMs: Math.round(renderStarted - contextStarted),
+                        renderMs: Math.round(performance.now() - renderStarted) });
                     return;
                 }
                 let titleTag = "";
@@ -834,11 +945,21 @@ class CMapMaker extends IndoorControl {
                     titleTag,
                     poiCont.revision
                 )
+                stages.push({ target, totalMs: Math.round(performance.now() - targetStarted) });
             }
         })
+        const durationMs = Math.round(performance.now() - started);
+        if (durationMs >= 100) console.warn("viewArea: slow update", {
+            durationMs, featureCount: poiCont.pdata.geojson.length, stages
+        });
     }
 
     viewPoi(targets) {		// Poiを表示させる
+        if (Conf.poiView.poiFilter === "all") {
+            // Keep viewport/zoom/floor visibility while ignoring list filters.
+            poiCont.setPoi(undefined, false);
+            return;
+        }
         let nowselect = listTable.getSelCategory()          // tags,key=valueの複数値
         nowselect = nowselect[0] == "" ? "-" : nowselect[nowselect.length - 1]
         //console.log(`viewPoi: Start(now select ${nowselect}).`)
@@ -893,15 +1014,15 @@ class CMapMaker extends IndoorControl {
                     if (Conf.activities[actname] !== undefined) {
                         let forms = Conf.activities[actname].form
                         for (const key of Object.keys(forms)) { // 複数あっても一つだけとする
-                            if (forms[key].type === "image_url" && String(act[key] ?? "").trim()) {
-                                urls.push(act[key]);
+                            if (forms[key].type === "image_url" && String(act[forms[key].gsheet || key] ?? "").trim()) {
+                                urls.push(act[forms[key].gsheet || key]);
                                 break;
                             }
                         }
                     } else {
                         console.warn("cMapmaker.makeImage: No Activity Name");
                     }
-                    if (urls.length) acts.push({ "src": urls, "osmid": act.osmid, "title": act.title })
+                    if (urls.length) acts.push({ "src": urls, "osmid": act.osmid, "title": act.title, "activity": act })
                 }
             })
             const imageKeys = new Set(acts.flatMap(act =>
@@ -940,20 +1061,22 @@ class CMapMaker extends IndoorControl {
 
     async loadActivitiesForView(force = false) {
         if (!this.usesActivityBbox()) return false;
-        // A date-line crossing view cannot be represented by one API BBOX.
-        const viewportBbox = areaSearchController.searchBbox();
-        const bbox = viewportBbox ?? "-180,-90,180,90";
+        // All-activity lists must not lose registrations when the map moves.
+        const allActivities = Conf.listTable?.allActs === true;
+        const viewportBbox = allActivities ? null : areaSearchController.searchBbox();
+        const bbox = allActivities ? "all" : viewportBbox ?? "-180,-90,180,90";
         if (!force && bbox === this.lastActivityBbox) return false;
         const requestId = ++this.activityRequestId;
         const url = new URL(Conf.activity.url, location.href);
-        url.searchParams.set("bbox", bbox);
-        console.info(viewportBbox === null
-            ? "Activity BBOX request (full-world fallback):"
-            : "Activity BBOX request (viewport):", url.href);
+        if (allActivities) url.searchParams.delete("bbox");
+        else url.searchParams.set("bbox", bbox);
+        console.info(allActivities ? "Activity request (all registrations):"
+            : viewportBbox === null ? "Activity BBOX request (full-world fallback):"
+                : "Activity BBOX request (viewport):", url.href);
         try {
             const activities = await gSheet.get(url.href, { throwOnError: true });
             if (requestId !== this.activityRequestId) return false;
-            if (Conf.poiView.poiActLoad && !Conf.static.use) {
+            if (Conf.poiView.poiActLoad && (!Conf.static.use || Conf.etc.editMode)) {
                 // Imported rows may have no coordinates, and activity-only maps do not
                 // run a viewport OSM query. Resolve their OSM IDs here as well.
                 const osmids = [...new Set(activities.map(act => act.osmid).filter(Boolean))]
@@ -981,14 +1104,7 @@ class CMapMaker extends IndoorControl {
     }
 
     async reloadActivitiesForView() {
-        if (this.usesActivityBbox()) {
-            if (!await this.loadActivitiesForView(true)) throw new Error("Activity reload failed");
-        } else {
-            const activities = await gSheet.get(Conf.activity.url);
-            poiCont.setActdata(activities);
-            poiCont.setActlnglat();
-        }
-        return this.updateView();
+        return this.updateView(undefined, { reloadActivities: true });
     }
 
     // OSMとGoogle SpreadSheetからPoiを取得してリスト化
@@ -1049,7 +1165,50 @@ class CMapMaker extends IndoorControl {
     }
 
     // OSMデータを取得して画面表示
-    updateView(cat) {
+    updateView(cat, { reloadActivities = false } = {}) {
+        clearTimeout(this.moveMapTimer);
+        this.moveMapTimer = null;
+        if (this.activeViewUpdate) {
+            this.moveMapPending = true;
+            this.pendingExplicitView ??= { waiters: [], reloadActivities: false };
+            this.pendingExplicitView.cat = cat;
+            this.pendingExplicitView.reloadActivities ||= reloadActivities;
+            return new Promise((resolve, reject) => {
+                this.pendingExplicitView.waiters.push({ resolve, reject });
+            });
+        }
+        this.moveMapPending = false;
+        this.moveMapBusy = true;
+        const update = Promise.resolve().then(async () => {
+            if (reloadActivities) {
+                if (this.usesActivityBbox()) {
+                    if (!await this.loadActivitiesForView(true)) throw new Error("Activity reload failed");
+                } else {
+                    const activities = await gSheet.get(Conf.activity.url);
+                    poiCont.setActdata(activities);
+                    poiCont.setActlnglat();
+                }
+            }
+            return this.performViewUpdate(cat);
+        }).finally(() => {
+            this.activeViewUpdate = null;
+            this.moveMapBusy = false;
+            const explicit = this.pendingExplicitView;
+            this.pendingExplicitView = null;
+            if (explicit) {
+                this.updateView(explicit.cat, { reloadActivities: explicit.reloadActivities }).then(
+                    value => explicit.waiters.forEach(waiter => waiter.resolve(value)),
+                    error => explicit.waiters.forEach(waiter => waiter.reject(error))
+                );
+            } else {
+                this.scheduleMoveMapUpdate();
+            }
+        });
+        this.activeViewUpdate = update;
+        return update;
+    }
+
+    performViewUpdate(cat) {
         console.log("updateView Start.")
         const requestId = ++this.updateViewRequestId;
         const activityPromise = this.loadActivitiesForView();
@@ -1080,6 +1239,10 @@ class CMapMaker extends IndoorControl {
                         await areaSearchController.syncSearch();
                         if (requestId !== this.updateViewRequestId) {
                             resolve({ "update": false, "stale": true });
+                            return;
+                        }
+                        if (this.moveMapPending || mapLibre.map?.isMoving?.()) {
+                            resolve({ "update": false, "deferred": true });
                             return;
                         }
                         let targets = listTable.getSelCategory();
@@ -1113,10 +1276,9 @@ class CMapMaker extends IndoorControl {
     // キーワード検索
     searchKeyword(keyword) {
         if (keyword !== null) {
-            const div = document.createElement("div");             // サニタイズ処理
-            div.appendChild(document.createTextNode(keyword));
             this.changeMode('list')
-            setTimeout(() => { listTable.filterKeyword(div.innerHTML) }, 300)
+            if (winCont.sidebarSize === 1) winCont.setSidebar("list");
+            setTimeout(() => { listTable.filterKeyword(keyword) }, 300)
             areaSearchController.renderDisplayStatus();
         }
     }
@@ -1173,6 +1335,12 @@ class CMapMaker extends IndoorControl {
                     let name = poiCont.getOSMname(tags, glot.lang);
                     name = name == "" ? poiCont.getCatnames(tags)[0] : name;   // 名前がある場合は「: 名前」とする
                     title += name;
+                    const operator = String(tags.operator ?? "").trim();
+                    if (operator && operator !== name) {
+                        const operatorHtml = operator.replace(/[&<>"']/g, char =>
+                            ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+                        title += ` / ${operatorHtml}`;
+                    }
 
                     if (title == "") title = category[0] + category[1] !== "" ? "(" + category[1] + ")" : "";   // サブカテゴリ時は追加
                     if (title == "") title = glot.get("undefined");
@@ -1183,21 +1351,21 @@ class CMapMaker extends IndoorControl {
                     message += osmBasic.make(tags);
                     message += osmBasic.makeAreaFacilities(osmid);
                     message += areaSearchController.matchReasonHtml(osmid);
-                    if (tags.wikipedia !== undefined) {
-                        message += wikimedia.makeWikipediaOverView(tags.wikipedia)
-                    }
-
                     // append activity
                     let catname = listTable.getSelCategory() !== "-" ? `&category=${listTable.getSelCategory()}` : "";
-                    let actlists = poiCont.getActlistByOsmid(osmid);
-                    const detailUrl = this.withIndoorLevel(location.pathname + "?" + osmid + (!openid ? "" : "." + openid) + catname);
+                    const facilityActivities = poiCont.getActlistByOsmid(osmid);
+                    const actlists = facilityActivities.filter(activity => listTable.matchesSelectedEventDate(activity));
+                    const modeQuery = Conf.etc.editMode && this.editModeSwitchEnabled ? "&edit=true" : "";
+                    const detailUrl = this.withIndoorLevel(location.pathname + "?" + osmid + (!openid ? "" : "." + openid) + catname + modeQuery);
                     history.replaceState('', '', detailUrl + location.hash);
-                    if (actlists.length > 0) {	// アクティビティ有り
-                        message += modalActs.make(actlists);
-                        winCont.makeDetail({ "title": title, "message": message, "append": Conf.menu.activities, "menu": true, "openid": openid });
-                    } else {					// アクティビティ無し
-                        winCont.makeDetail({ "title": title, "message": message, "append": Conf.menu.activities, "menu": true, "openid": openid });
+                    if (actlists.length > 0) message += modalActs.make(actlists);
+                    if (tags.wikipedia !== undefined) {
+                        message += `<details class="facility-wikipedia"${facilityActivities.length === 0 ? " open" : ""}>
+                            <summary>${glot.get("placeAboutWikipedia")}</summary>
+                            ${wikimedia.makeWikipediaOverView(tags.wikipedia)}
+                        </details>`;
                     }
+                    winCont.makeDetail({ "title": title, "message": message, "append": Conf.menu.activities, "menu": true, "openid": openid });
                     mapLibre.viewMiniMap(tags.country)
                     cMapMaker.changeMode("map")
                     this.detail = true
@@ -1240,6 +1408,7 @@ class CMapMaker extends IndoorControl {
     }
 
     syncPoiStatus(osmid) {
+        osmid = poiStatusCont.getStatusId(osmid);
         const record = poiStatusCont.getRecord(osmid);
         for (const kind of ["visited", "favorite"]) {
             const button = document.getElementById(kind);
@@ -1265,8 +1434,9 @@ class CMapMaker extends IndoorControl {
         const visited = document.getElementById("visited");
         const favorite = document.getElementById("favorite");
         const memo = document.getElementById("visited-memo");
-        if (!visited || !favorite || !memo) return;
-        poiStatusCont.setValueByOSMID(visited.name, visited.getAttribute("aria-pressed") === "true", favorite.getAttribute("aria-pressed") === "true", memo.value);
+        if (!visited || !favorite) return;
+        const memoValue = memo?.value ?? poiStatusCont.getRecord(visited.name).memo;
+        poiStatusCont.setValueByOSMID(visited.name, visited.getAttribute("aria-pressed") === "true", favorite.getAttribute("aria-pressed") === "true", memoValue);
         if (refreshMarkers) {
             this.viewPoi(listTable.getSelCategory());
             listTable.renderList();
@@ -1292,7 +1462,9 @@ class CMapMaker extends IndoorControl {
             const selectedCategory = listTable.getSelCategory().join(",");
             const catname = selectedCategory !== "" && selectedCategory !== "-"
                 ? `?category=${encodeURIComponent(selectedCategory)}` : "";
-            history.replaceState('', '', this.withIndoorLevel(location.pathname + catname) + location.hash)
+            const modeQuery = Conf.etc.editMode && this.editModeSwitchEnabled
+                ? `${catname ? "&" : "?"}edit=true` : "";
+            history.replaceState('', '', this.withIndoorLevel(location.pathname + catname + modeQuery) + location.hash)
         }
         this.openOSMid = null
         this.detail = false
@@ -1397,6 +1569,7 @@ class CMapMaker extends IndoorControl {
     eventViewThumb(imgdom) {
         console.log("eventViewThumb: Start.");
 
+        imgdom = imgdom.closest?.(".thumbnail-card")?.querySelector("img") ?? imgdom;
         const osmid = imgdom.getAttribute("osmid");
         const poi = poiCont.get_osmid(osmid);
         const zoomlv = Math.max(mapLibre.getZoom(true), Conf.map.detailZoom);
@@ -1413,18 +1586,48 @@ class CMapMaker extends IndoorControl {
         })
     }
 
-    // EVENT: map moveend発生時のイベント
+    eventStartMoveMap() {
+        if (this.status !== "normal") return;
+        clearTimeout(this.moveMapTimer);
+        this.moveMapTimer = null;
+        this.moveMapPending = true;
+    }
+
+    // Keep only the latest position, and wait for a short quiet period.
     eventMoveMap() {
-        if (cMapMaker.status !== "normal") return;
+        if (this.status !== "normal") return;
+        this.lastMapMoveEnd = Date.now();
+        this.moveMapPending = true;
+        this.scheduleMoveMapUpdate();
+    }
+
+    scheduleMoveMapUpdate() {
+        clearTimeout(this.moveMapTimer);
+        this.moveMapTimer = null;
+        if (this.status !== "normal" || !this.moveMapPending || this.activeViewUpdate) return;
+        // moveend can be dispatched before the input handler clears isMoving().
+        // Keep a recheck scheduled: a second moveend is not guaranteed.
+        const minimumDelay = mapLibre.map?.isMoving?.() ? 50 : 0;
+        const remaining = Math.max(minimumDelay, this.lastMapMoveEnd + MAP_MOVE_SETTLE_DELAY_MS - Date.now());
+        this.moveMapTimer = setTimeout(() => {
+            this.moveMapTimer = null;
+            if (this.status !== "normal" || !this.moveMapPending || this.activeViewUpdate) return;
+            if (mapLibre.map?.isMoving?.()) {
+                this.scheduleMoveMapUpdate();
+                return;
+            }
+            // A newer moveend can have reset the quiet-period deadline.
+            if (Date.now() < this.lastMapMoveEnd + MAP_MOVE_SETTLE_DELAY_MS) {
+                this.scheduleMoveMapUpdate();
+                return;
+            }
+            this.flushMoveMapUpdate();
+        }, remaining);
+    }
+
+    flushMoveMapUpdate() {
+        this.moveMapPending = false;
         void this.refreshChangeRegion();
-        if (cMapMaker.moveMapBusy) {
-            cMapMaker.moveMapPending = true;
-            console.log("eventMoveMap: Queue latest move.");
-            return;
-        }
-        //console.log("eventMoveMap: Start. ");
-        cMapMaker.moveMapBusy = true;
-        cMapMaker.moveMapPending = false;
 
         const zoom = mapLibre.getZoom(false);
         const zoomLevels = Object.keys(Conf.poiView.poiZoom).map(target => this.getPoiZoom(target));
@@ -1437,20 +1640,11 @@ class CMapMaker extends IndoorControl {
             this.makeImages(false);                             // イメージリストを非表示
             this.viewIndoor();
             this.viewPoi(listTable.getSelCategory());
-            cMapMaker.moveMapBusy = false
             return;
         }
-        //cMapMaker.updateView().then(() => cMapMaker.moveMapBusy = false)
-        cMapMaker.updateView()
+        this.updateView()
             .catch((e) => {
                 console.warn("cMapMaker.eventMoveMap: updateView failed", e);
-            })
-            .finally(() => {
-                cMapMaker.moveMapBusy = false;
-                if (!cMapMaker.moveMapPending) return;
-                cMapMaker.moveMapPending = false;
-                console.log("eventMoveMap: Replay queued move.");
-                setTimeout(() => cMapMaker.eventMoveMap(), 0);
             });
     }
 
@@ -1469,11 +1663,17 @@ class CMapMaker extends IndoorControl {
                 newsTicker.update()
                 break;
             case "ChangePoi":
+                this.refreshLocalFilters();
                 cMapMaker.updateView()
+                break;
+            default:
+                this.refreshLocalFilters();
                 break;
         }
         catname = selcategory !== "-" ? `?category=${selcategory}` : ""
-        history.replaceState('', '', this.withIndoorLevel(location.pathname + catname) + location.hash)
+        const modeQuery = Conf.etc.editMode && this.editModeSwitchEnabled
+            ? `${catname ? "&" : "?"}edit=true` : "";
+        history.replaceState('', '', this.withIndoorLevel(location.pathname + catname + modeQuery) + location.hash)
         cMapMaker.clearDatail()
         geoCont.writePoiCircle()
         mapLibre.map.redraw()

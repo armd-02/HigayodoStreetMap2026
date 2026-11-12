@@ -29,7 +29,7 @@ assert.equal(prepared.selectItem.action, 'ChangePoi', 'category changes must ref
 assert.equal(new URL(prepared.activity.url).protocol, 'https:');
 assert.equal(new URL(prepared.activity.url).searchParams.get('app'), 'higayodo_artfes_2026');
 assert.equal(prepared.google.AppScript, prepared.activity.url);
-assert.equal(prepared.activity.local.use, true);
+assert.equal(prepared.activity.local.use, false);
 assert.ok(prepared.activity.local.hosts.includes('127.0.0.1'));
 assert.equal(new URL(prepared.activity.local.url).hostname, '127.0.0.1');
 for (const name of ['news', 'changes', 'intro', 'areaFeatureLinker', 'areaSearch',
@@ -46,6 +46,7 @@ assert.equal(context.modelLayer.getModelKey({ amenity: 'vending_machine', brand:
 assert.equal(context.modelLayer.getModelKey({ amenity: 'vending_machine' }), 'vending_machine');
 for (const model of Object.values(prepared.feature3d.models)) if (model.url) assert(fs.existsSync(model.url));
 assert.equal(prepared.indoor.use, false);
+assert.equal(prepared.icon.photoMarkers.use, true, 'POI photos are enabled for this site');
 assert.equal(parse('data/glot-custom.jsonc').site_title.ja, 'ひがよど文化祭 会場周遊マップ2026');
 assert.equal(parse('manifest.json').gId, '');
 assert.equal(prepared.map.tileName, 'OSMFJ_NOPOI');
@@ -56,7 +57,7 @@ assert.equal(JSON.stringify(prepared.static.osmjsons), '[]');
 assert.equal(prepared.etc.localSave, 'higayodo2026');
 assert.equal(prepared.etc.reverseIcon, false);
 assert.equal(prepared.selectItem.default, 'activity');
-assert.equal(prepared.icon.markerColors.attention.stroke, '#ffc786');
+assert.equal(prepared.icon.markerColors.attention.stroke, '#b64e12');
 assert.equal(JSON.stringify(parse('data/listtable.jsonc').list.columns.poiFields),
     '["id","ref","name","#category","reservation"]');
 // The application merges these files shallowly, in this order.

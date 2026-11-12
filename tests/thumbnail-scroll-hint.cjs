@@ -12,6 +12,7 @@ const strip = { children: [], classList: classes(), scrollWidth: 400, clientWidt
     addEventListener: (type, handler) => { handlers[type] = handler; },
     removeEventListener: type => { delete handlers[type]; },
     append(image) { this.children.push(image); },
+    querySelector() { return this.children[0] ?? null; },
     querySelectorAll() { return this.children.filter(image => image.dataset.thumbnailLoaded === 'true'); },
     set innerHTML(value) { this.children = []; }
 };
@@ -32,6 +33,7 @@ const context = { console, images: strip, scrollHand: hint,
         };
     } }
 };
+require('./helpers/thumbnail-cards')(context, strip);
 vm.createContext(context);
 vm.runInContext(fs.readFileSync('lib/winlib.js', 'utf8') + '\nthis.win = new WinCont();', context);
 let shown = 0;
@@ -40,7 +42,10 @@ const acts = [{ src: ['photo.jpg'], osmid: 'way/1', title: 'photo' }];
 const flush = () => { while (frames.length) frames.shift()(); };
 context.win.setImages(strip, acts, 'loading.svg', 10, ready);
 assert.equal(shown, 0, 'allocating thumbnails must not display the hint');
-const image = strip.children[0];
+const image = strip.querySelector("img");
+assert.equal(strip.children[0].className, 'thumbnail-card');
+assert.equal(strip.children[0].children[1].textContent, 'photo');
+assert.equal(strip.children[0].children[1].className, 'thumbnail-caption');
 image.src = 'loading.svg'; image.loaded(); flush();
 assert.equal(shown, 0, 'the loading placeholder is not a photo');
 image.src = 'photo.jpg';

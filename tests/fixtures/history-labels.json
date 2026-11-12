@@ -1,0 +1,34 @@
+{
+  "list_religion_label": {
+    "ja": "宗教：",
+    "en": "Religion: "
+  },
+  "list_denomination_label": {
+    "ja": "宗派：",
+    "en": "Denomination: "
+  },
+  "list_start_date_label": {
+    "ja": "年代：",
+    "en": "Date: "
+  },
+  "religion_buddhist": {
+    "ja": "仏教",
+    "en": "Buddhism"
+  },
+  "religion_shinto": {
+    "ja": "神道",
+    "en": "Shinto"
+  },
+  "denomination_jodo_shinshu": {
+    "ja": "浄土真宗",
+    "en": "Jodo Shinshu"
+  },
+  "denomination_soto": {
+    "ja": "曹洞宗",
+    "en": "Soto"
+  },
+  "denomination_catholic": {
+    "ja": "カトリック",
+    "en": "Catholic"
+  }
+}

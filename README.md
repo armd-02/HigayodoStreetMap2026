@@ -30,6 +30,10 @@ python3 -m http.server 8765 --bind 127.0.0.1
   - 取り込み確認コミット: `4455adb5b8a033f25404a605a2943f561ee3dfd0`（2026-10-31）
   - 無効な機能も含む共通処理を更新し、ひがよど固有の設定・データ・装飾と既存の共通拡張は保持しています。
 
+- 共通コード更新元: [K-Sakanoshita/community_mapmaker](https://github.com/K-Sakanoshita/community_mapmaker)
+  - 取り込み確認コミット: `197f367372950a46b973f3eb5889a42f8be0550f`（2026-11-12）
+  - ひがよど固有の設定・データ・装飾を保持しています。
+
 ## 2026年版の設定
 
 - `index.html`: サイト名、説明、共有用URL、起動画面。
@@ -49,12 +53,20 @@ python3 -m http.server 8765 --bind 127.0.0.1
 アプリKeyは `higayodo_artfes_2026`、公開時の取得先は
 `https://armd-01.sakura.ne.jp/community-mapmaker-backend/api/activities.php?app=higayodo_artfes_2026` です。
 `google.AppScript` と、優先される `activity.url` の両方をこのURLに揃えています。
-ローカルホストでは `activity.local` により開発用API
-`http://127.0.0.1:18080/api/activities.php?app=higayodo_artfes_2026` に切り替えます。
+ローカルホストでも本番APIに接続します。開発用APIへの切り替えは
+`activity.local.use: false` で無効にしています。
 項目定義は `data/config-activities.jsonc` に同梱しています。
 登録地点に紐づくOSMデータはOverpass APIから取得します。
 
 ## 更新履歴
+
+### 2026-11-12
+
+- Community Map Maker の最新共通コードを取り込み、画像処理・一覧・地図更新処理を更新。
+- POIの写真マーカー表示（`icon.photoMarkers.use`）を有効化。
+- POIの枠色を濃い配色へ変更し、本番サムネイルAPIの利用を有効化。
+- ローカル起動時も本番バックエンドを使用。
+- パンフレットの表示位置、掲載情報の項目定義、おかんアートの画像を更新。
 
 ### 2026-10-31
 

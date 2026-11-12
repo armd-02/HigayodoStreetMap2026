@@ -9,8 +9,8 @@
         "items": [
             {
                 "coordinates": [
-                    135.5297,
-                    34.7426
+                    135.5271,
+                    34.7570
                 ],
                 "titleKey": "map_documents_title",
                 "links": [
@@ -107,6 +107,7 @@
         ]
     },
     "icon": {
+        "photoMarkers": { "use": true, "maxMarkers": 100, "imageFields": [] },
         "fgPath": "icon",
         "bgPath": "image",
         "flagPath": "./flags/w40",
@@ -124,30 +125,31 @@
         "textViewZoom": 16,
         "markerColors": {
             "hover": {
-                "stroke": "#e9a05b"
+                "stroke": "#84320b"
             },
             "attention": {
                 "fill": "#ffffff",
-                "stroke": "#ffc786"
+                "stroke": "#b64e12"
             },
             "green": {
                 "fill": "#ffffff",
-                "stroke": "#51b3a1"
+                "stroke": "#087d6b"
             },
             "middle": {
                 "fill": "#ffffff",
-                "stroke": "#4d77ac"
+                "stroke": "#235da0"
             },
             "normal": {
                 "fill": "#ffffff",
-                "stroke": "#bfbfe1"
+                "stroke": "#5b3f8c"
             },
             "visited": {
                 "fill": "#ffffff",
-                "stroke": "#9c9c9c"
+                "stroke": "#596579"
             }
         }
     },
+    "stampMarkers": { "use": false, "osmIds": [] },
     "poiView": {
         "poiActLoad": true,
         "poiZoom": {
@@ -340,6 +342,11 @@
         ]
     },
     "thumbnail": {
+        "backend": {
+            "use": true,
+            "url": "https://armd-01.sakura.ne.jp/community-mapmaker-backend/api/thumbnail.php?app=higayodo_artfes_2026",
+            "concurrency": 2
+        },
         "use": true,
         "limits": 40,
         "slideThumbWidth": "320",
@@ -486,7 +493,7 @@
         "authMode": "basic",
         "targetName": "activity",
         "local": {
-            "use": true,
+            "use": false,
             "hosts": ["127.0.0.1", "localhost", "::1", "[::1]"],
             "url": "http://127.0.0.1:18080/api/activities.php?app=higayodo_artfes_2026"
         }

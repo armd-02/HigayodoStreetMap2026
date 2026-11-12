@@ -4,11 +4,6 @@
             "header": "",
             "footer": "",
             "form": {
-                "actdate": {
-                    "glot": "higayodo_field_actdate",
-                    "type": "date",
-                    "gsheet": "actdate"
-                },
                 "title": {
                     "glot": "higayodo_field_title",
                     "type": "text",

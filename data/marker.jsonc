@@ -1,7 +1,6 @@
 {
     "marker": {
         "background": [
-            "circle_marker.png",
             "circle_shadow.png"
         ],
         "tag": {
@@ -45,6 +44,7 @@
                 "college": "college.png",
                 "community_centre": "town-hall.png",
                 "compressed_air": "powered_pump.png",
+                "conference_centre": "user-tie-solid-full.png",
                 "co-working": "commercial.png",
                 "courthouse": "courthouse.png",
                 "coworking_space": "commercial.png",
@@ -399,6 +399,7 @@
                 "storage_rental": "storage_rental.png",
                 "sunglasses": "optician.png",
                 "supermarket": "grocery.png",
+                "tattoo": "tattoo_machine.png",
                 "tailor": "needle_and_spool.png",
                 "tea": "teahouse.png",
                 "ticket": "ticket.png",
