@@ -6,6 +6,19 @@ var Conf = {}; // Config Praams
 const LANG = window.APP_LANGUAGE || ((window.navigator.languages?.[0] || window.navigator.language || window.navigator.userLanguage || window.navigator.browserLanguage || "en").toLowerCase().startsWith("ja") ? "ja" : "en");
 const MAP_TITLE_DISPLAY_DELAY_MS = 500;
 const MAP_MOVE_SETTLE_DELAY_MS = 300;
+async function retryInitialDataLoad(load, label, isCurrent = () => true) {
+    const delays = [500, 1500];
+    for (let attempt = 0; ; attempt++) {
+        try {
+            return await load();
+        } catch (error) {
+            if (attempt >= delays.length || !isCurrent()) throw error;
+            console.warn(`${label}: retrying after load failure`, error);
+            await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+            if (!isCurrent()) throw error;
+        }
+    }
+}
 const glot = new Glottologist();
 glot.lang = LANG;
 let modalActs = null;
@@ -407,9 +420,11 @@ class CMapMaker extends IndoorControl {
             console.log("cMapMaker: Static mode");
             // Process one file at a time instead of retaining every response body.
             for (const url of Conf.static.osmjsons) {
-                const response = await fetch(window.withAppAssetVersion(url));
-                if (!response.ok) throw new Error(`Static data load failed: ${url} (${response.status})`);
-                const data = await response.text();
+                const data = await retryInitialDataLoad(async () => {
+                    const response = await fetch(window.withAppAssetVersion(url));
+                    if (!response.ok) throw new Error(`Static data load failed: ${url} (${response.status})`);
+                    return response.text();
+                }, "Static data");
                 let json;
                 try {
                     json = await overPassCont.parseOverpassJsonAsync(data);
@@ -1074,7 +1089,10 @@ class CMapMaker extends IndoorControl {
             : viewportBbox === null ? "Activity BBOX request (full-world fallback):"
                 : "Activity BBOX request (viewport):", url.href);
         try {
-            const activities = await gSheet.get(url.href, { throwOnError: true });
+            const load = () => gSheet.get(url.href, { throwOnError: true });
+            const activities = this.lastActivityBbox === null
+                ? await retryInitialDataLoad(load, "Activity data", () => requestId === this.activityRequestId)
+                : await load();
             if (requestId !== this.activityRequestId) return false;
             if (Conf.poiView.poiActLoad && (!Conf.static.use || Conf.etc.editMode)) {
                 // Imported rows may have no coordinates, and activity-only maps do not
