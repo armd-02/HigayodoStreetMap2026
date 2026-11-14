@@ -9,8 +9,8 @@
         "items": [
             {
                 "coordinates": [
-                    135.5271,
-                    34.7570
+                    135.5180,
+                    34.7517
                 ],
                 "titleKey": "map_documents_title",
                 "links": [
@@ -67,8 +67,8 @@
         "referenceZoom": 15,
         "minZoom": 0,
         "maxZoom": 24,
-        "widthPx": 120,
-        "mobileWidthPx": 80,
+        "widthPx": 180,
+        "mobileWidthPx": 120,
         "shadow": {
             "use": true,
             "color": "rgba(0, 0, 0, 0.25)",
@@ -93,8 +93,8 @@
             { "id": "illustration6", "image": "./moto_data/加工/イラスト6_結果.png", "coordinates": [135.5220, 34.7330], "priority": 6 },
             { "id": "illustration7", "image": "./moto_data/加工/イラスト7_結果.png", "coordinates": [135.5428, 34.7550], "priority": 7 },
             { "id": "illustration8", "image": "./moto_data/加工/イラスト8_結果.png", "coordinates": [135.5378, 34.7402], "priority": 8 },
-            { "id": "higayodo-logo", "image": "./moto_data/加工/higayodo.png", "coordinates": [135.5180, 34.7570], "widthPx": 600, "mobileWidthPx": 360, "priority": 0 },
-            { "id": "sanyodo-logo", "image": "./moto_data/加工/さんよどLogo_結果.jpg", "coordinates": [135.5487, 34.7360], "widthPx": 340, "mobileWidthPx": 204, "priority": 0 }
+            { "id": "higayodo-logo", "image": "./moto_data/加工/higayodo.png", "coordinates": [135.5180, 34.7570], "widthPx": 864, "mobileWidthPx": 518, "priority": 0 },
+            { "id": "sanyodo-logo", "image": "./moto_data/加工/さんよどLogo_結果.jpg", "coordinates": [135.5487, 34.7360], "widthPx": 490, "mobileWidthPx": 294, "priority": 0 }
         ]
     },
     "minimap": {

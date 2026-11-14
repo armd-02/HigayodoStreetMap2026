@@ -136,3 +136,6 @@ img.slide {
         display: none !important;
     }
 }
+/* 地図上のパンフレット案内を少し小さくする。 */
+.map-image-link { width: 90px; min-height: 58px; }
+.map-image-link img { width: 82px; height: 40px; }
