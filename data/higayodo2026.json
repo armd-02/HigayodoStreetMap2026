@@ -1,4 +1,205 @@
 {
-    "version": 0.6,
-    "elements": []
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.4 2390de5a",
+  "osm3s": {
+    "timestamp_osm_base": "2026-11-12T14:02:14Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 3916117306,
+  "lat": 34.7381958,
+  "lon": 135.5426804,
+  "tags": {
+    "addr:city": "東淀川区",
+    "addr:housenumber": "5-1-2",
+    "addr:postcode": "5330013",
+    "addr:street": "豊里",
+    "amenity": "cafe",
+    "cuisine": "coffee_shop",
+    "name": "Moricafe",
+    "opening_hours": "Mo-Fr 07:00-17:00; We off; Sa,Su,PH 07:00-15:00"
+  }
+},
+{
+  "type": "node",
+  "id": 7487254925,
+  "lat": 34.7425068,
+  "lon": 135.5357371,
+  "tags": {
+    "amenity": "restaurant",
+    "contact:instagram": "monte_nese",
+    "cuisine": "italian",
+    "name": "トラットリア モンテネーゼ",
+    "opening_hours": "Mo 11:00-14:00, 18:00-21:30; Tu 11:00-14:00; Th-Su 11:00-14:00, 18:00-21:30; We off",
+    "opening_hours:covid19": "Mo 11:00-14:00, 18:00-20:00; Tu 11:00-14:00; Th-Su 11:00-14:00, 18:00-20:00; We off",
+    "reservation": "yes",
+    "takeaway:covid19": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 7795996208,
+  "lat": 34.7502726,
+  "lon": 135.5330310,
+  "tags": {
+    "KSJ2:LIN": "京都線",
+    "KSJ2:STN": "上新庄",
+    "local_ref": "1",
+    "name": "上新庄",
+    "name:de": "Kami-Shinjo",
+    "name:en": "Kami-Shinjo",
+    "name:ja": "上新庄",
+    "name:ja-Hira": "かみしんじょう",
+    "name:ja-Latn": "Kami-Shinjō",
+    "name:ko": "가미신조",
+    "note": "National-Land Numerical Information (Railway) 2007, MLIT Japan",
+    "note:ja": "国土数値情報（鉄道データ）平成19年 国土交通省",
+    "public_transport": "stop_position",
+    "railway": "stop",
+    "ref": "HK64",
+    "source": "KSJ2",
+    "source_ref": "http://nlftp.mlit.go.jp/ksj/jpgis/datalist/KsjTmplt-N02-v1_1.html",
+    "train": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 9817343475,
+  "lat": 34.7502168,
+  "lon": 135.5340408,
+  "tags": {
+    "check_date": "2025-10-06",
+    "contact:instagram": "m.house1101",
+    "dance:teaching": "yes",
+    "email": "m.house1101@gmail.com",
+    "leisure": "dance",
+    "level": "1",
+    "name": "ミュージックハウスDJ"
+  }
+},
+{
+  "type": "node",
+  "id": 11765930909,
+  "lat": 34.7587505,
+  "lon": 135.5504212,
+  "tags": {
+    "amenity": "cafe",
+    "contact:instagram": "coffee_halo",
+    "name": "コーヒーハロ",
+    "name:en": "coffee halo",
+    "outdoor_seating": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 12296672565,
+  "lat": 34.7430909,
+  "lon": 135.5347528,
+  "tags": {
+    "amenity": "restaurant",
+    "contact:instagram": "wakka.2024",
+    "name": "食堂 わっか",
+    "phone": "+816-6300-7051"
+  }
+},
+{
+  "type": "node",
+  "id": 14305724327,
+  "lat": 34.7345370,
+  "lon": 135.5171400,
+  "tags": {
+    "amenity": "cafe",
+    "check_date": "2026-10-21",
+    "contact:instagram": "kissasaboten",
+    "level": "0",
+    "name": "喫茶サボテン",
+    "opening_hours": "Mo-Th 11:30-22:00; Fr-Sa 11:30-23:00; Su off"
+  }
+},
+{
+  "type": "node",
+  "id": 14305724328,
+  "lat": 34.7368267,
+  "lon": 135.5167740,
+  "tags": {
+    "amenity": "studio",
+    "check_date": "2026-10-21",
+    "level": "0",
+    "name": "Salon de GAKU",
+    "studio": "music"
+  }
+},
+{
+  "type": "node",
+  "id": 14314403682,
+  "lat": 34.7431024,
+  "lon": 135.5352788,
+  "tags": {
+    "amenity": "cafe",
+    "check_date": "2026-10-24",
+    "name": "珈琲食堂クモノキレマ"
+  }
+},
+{
+  "type": "node",
+  "id": 14314407225,
+  "lat": 34.7485021,
+  "lon": 135.5343451,
+  "tags": {
+    "amenity": "bar",
+    "check_date": "2026-10-24",
+    "name": "BAR LILAC"
+  }
+},
+{
+  "type": "way",
+  "id": 1112592094,
+  "nodes": [
+    10179187053,
+    10179187054,
+    10179187055,
+    14314414907,
+    10179187056,
+    10179187053
+  ],
+  "tags": {
+    "building": "detached",
+    "building:levels": "2"
+  }
+},
+{
+  "type": "node",
+  "id": 10179187053,
+  "lat": 34.7496328,
+  "lon": 135.5322701
+},
+{
+  "type": "node",
+  "id": 10179187054,
+  "lat": 34.7495563,
+  "lon": 135.5323404
+},
+{
+  "type": "node",
+  "id": 10179187055,
+  "lat": 34.7494897,
+  "lon": 135.5322332
+},
+{
+  "type": "node",
+  "id": 10179187056,
+  "lat": 34.7495662,
+  "lon": 135.5321629
+},
+{
+  "type": "node",
+  "id": 14314414907,
+  "lat": 34.7495245,
+  "lon": 135.5322012
+}
+
+  ]
 }

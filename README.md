@@ -40,7 +40,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 - `data/config-user.jsonc`: 初期位置・表示範囲、読み込み元、メニュー。
 - `data/config-system.jsonc`: 背景地図と共通設定。
 - `data/glot-custom.jsonc`: サイトの日本語・英語表示。
-- `data/higayodo2026.json`: 初期作成時の空のOSM JSON（現在は読み込み対象外）。
+- `data/higayodo2026.json`: 会場に対応する静的なOSMデータ。
 - `data/config-activities.jsonc`: バックエンドの項目に対応する詳細表示。
 - `manifest.json`: コピー元のアクセス解析IDを無効化。
 - `image/higayodo2026.svg`: 起動画面・favicon。
@@ -95,8 +95,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 - 装飾画像は地図と一緒に回転・傾斜・拡大縮小し、重なりや枚数による自動非表示を無効化。
 - サイト名・説明・起動画面を更新し、コピー元の万博専用データ・画面を除去。
 
-掲載画像と地図用画像を `moto_data/加工/` に同梱します。元のPDF・未使用素材・
-重複する `stores/` は今回の公開対象に含めません。
+掲載画像と地図用画像、PDFおよび `stores/` 内の画像を同梱します。
 
 ## ライセンス
 

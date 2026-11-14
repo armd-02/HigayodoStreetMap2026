@@ -111,13 +111,13 @@
         "fgPath": "icon",
         "bgPath": "image",
         "flagPath": "./flags/w40",
-        "shadow": 0.65,
-        "attention": 0.65,
-        "green": 0.65,
-        "middle": 0.65,
-        "visited": 0.5,
-        "normal": 0.65,
-        "flag": 0.5,
+        "shadow": 0.78,
+        "attention": 0.78,
+        "green": 0.78,
+        "middle": 0.78,
+        "visited": 0.6,
+        "normal": 0.78,
+        "flag": 0.6,
         "textFont": [
             "Noto Sans Regular"
         ],
@@ -201,7 +201,7 @@
         "height": 0.6
     },
     "feature3d": {
-        "use": true,
+        "use": false,
         "visualScale": 1,
         "hitArea": {
             "use": true,
@@ -358,8 +358,8 @@
         "Analytics": ""
     },
     "static": {
-        "use": false,
-        "osmjsons": []
+        "use": true,
+        "osmjsons": ["./data/higayodo2026.json"]
     },
     "indoor": {
         "use": false,
