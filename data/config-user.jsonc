@@ -455,7 +455,7 @@
             {
                 "glot-model": "openstreetmap",
                 "linkto": "https://www.openstreetmap.org/about",
-                "divider": true
+                "divider": false
             }
         ],
         "mainSystem": [],
