@@ -431,6 +431,7 @@
         "localSave": "higayodo2026",
         "reverseIcon": false,
         "editMode": false,
+        "editModeSwitch": false,
         "splashUrl": "./image/higayodo2026.svg",
         "loadingUrl": "./image/loading.gif"
     },
